@@ -1,0 +1,39 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Scenario Generation",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "namosim.main",
+      "justMyCode": true,
+      "args": [
+        "gen-alt-scenarios",
+        "--base-scenario",
+        "tests/experiments/scenarios/intersections/1_robot_50_goals_snamo.svg",
+        "--out-dir",
+        "tests/experiments/scenarios/intersections/generated"
+      ]
+    },
+    {
+      "name": "svg2stl",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "namosim.scripts.svg2stl",
+      "justMyCode": true,
+      "args": ["--svg-file", "tests/e2e/scenarios/minimal_stilman_2005.svg"]
+    },
+    {
+      "name": "Python: Current File",
+      "type": "debugpy",
+      "request": "launch",
+      "purpose": ["debug-test"],
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "include": ["namoros"],
+  "exclude": ["**/__pycache__", "**/build", "**/install", "**/log"],
+  "ignore": [],
+  "defineConstant": {
+    "DEBUG": true
+  },
+  "reportMissingImports": "error",
+  "reportMissingTypeStubs": false,
+  "reportIncompatibleMethodOverride": false,
+  "reportAttributeAccessIssue": false,
+  "reportArgumentType": false,
+  "reportOptionalMemberAccess": false,
+  "pythonVersion": "3.10",
+  "pythonPlatform": "Linux",
+  "executionEnvironments": [
+    {
+      "root": "./namoros",
+      "extraPaths": ["./namosim"]
+    }
+  ]
+}
