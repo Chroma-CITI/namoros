@@ -1,0 +1,4 @@
+[submodule "namosim"]
+	path = namosim
+	url = git@gitlab.inria.fr:chroma/namo/namosim.git
+	branch = humble
