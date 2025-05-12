@@ -58,7 +58,7 @@ from namoros_msgs.srv import (
 )
 from namoros_msgs.msg import NamoPath, NamoEntity, NamoConflict
 from namosim.world.world import World
-from namoros.robot_tracker import RobotTracker
+from namoros.world_state_tracker import WorldStateTracker
 from std_msgs.msg import Header
 
 
@@ -298,7 +298,7 @@ class NamoBehaviorNode(Node):
         self.forward_dist_to_obstacle: float = float("inf")
         self.obstacle_poses: t.Dict[str, Pose] = {}
         self.plan: NamoPlan | None = None
-        self.robot_tracker = RobotTracker()
+        self.world_state_tracker = WorldStateTracker()
         self.conflicts: t.List[NamoConflict] = []
 
     def init_goals(self):
@@ -314,6 +314,8 @@ class NamoBehaviorNode(Node):
     def create_obstacle_pose_callback(self, obstacle_name: str):
         def cb(msg: PoseArray):
             self.obstacle_poses[obstacle_name] = msg.poses[0]  # type: ignore
+            pose2d = utils.entity_pose_to_pose2d(msg.poses[0])  # type: ignore
+            self.world_state_tracker.update_obstacle(obstacle_name, pose2d)
 
         return cb
 
@@ -347,7 +349,7 @@ class NamoBehaviorNode(Node):
     def _robot_info_callback(self, entity: NamoEntity):
         if entity.entity_id == self.agent_id:
             return
-        self.robot_tracker.update(entity)
+        self.world_state_tracker.update_robot(entity)
 
     def publish_robot_info(self):
         entity = NamoEntity()
@@ -497,8 +499,13 @@ class NamoBehaviorNode(Node):
         req.observed_robot_pose.y = robot_pose.y
         req.observed_robot_pose.angle_degrees = robot_pose.degrees
 
-        for other_robot in self.robot_tracker.robots.values():
+        for other_robot in self.world_state_tracker.robots.values():
             req.other_observed_robots.append(other_robot)
+
+        if self.omniscient_obstacle_perception:
+            for obstacle in self.world_state_tracker.obstacles.values():
+                req.observed_obstacles.append(obstacle)
+
         self.srv_synchronize_planner.call(req)
 
     def detect_conflicts(self):

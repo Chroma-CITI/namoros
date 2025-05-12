@@ -90,29 +90,30 @@ class PlannerNode(Node):
             SynchronizeState,
             "namo_planner/synchronize_state",
             self.synchronize_state,
-            callback_group=self.sync_cb_group,
+            callback_group=self.services_cb_group,
         )
         self.srv_detect_conflicts = self.create_service(
             DetectConflicts,
             "namo_planner/detect_conflicts",
             self.detect_conflicts,
-            callback_group=self.sync_cb_group,
+            callback_group=self.services_cb_group,
         )
         self.srv_update_plan = self.create_service(
             UpdatePlan,
             "namo_planner/update_plan",
             self.update_plan,
-            callback_group=self.sync_cb_group,
+            callback_group=self.services_cb_group,
         )
         self.srv_end_postpone = self.create_service(
             EndPostpone,
             "namo_planner/end_postpone",
             self.end_postpone,
-            callback_group=self.sync_cb_group,
+            callback_group=self.services_cb_group,
         )
 
         # state
         self.current_plan: Plan | None = None
+        self.is_planning: bool = False
 
     def map_callback(self, data: OccupancyGrid):
         pass
@@ -134,21 +135,25 @@ class PlannerNode(Node):
     def compute_plan_callback(
         self, req: ComputePlan.Request, res: ComputePlan.Response
     ):
-        self.get_logger().info("computing plan")
-        robot_pose = entity_pose_to_pose2d(req.start_pose.pose)
-        goal_pose = entity_pose_to_pose2d(req.goal_pose.pose)
-        header = Header()
-        header.stamp = self.get_clock().now().to_msg()
-        header.frame_id = "map"
-        self.namo_planner.reset_robot_pose(self.namo_planner.agent, robot_pose)
-        self.namo_planner.reset_goal_pose(goal_pose)
-        plan_result = self.namo_planner.compute_plan(header=header)
-        if plan_result:
-            plan, plan_msg = plan_result
-            res.plan = plan_msg
-            self.current_plan = plan
-            self.get_logger().info(f"Finished computing plan")
-        return res
+        try:
+            self.is_planning = True
+            self.get_logger().info("computing plan")
+            robot_pose = entity_pose_to_pose2d(req.start_pose.pose)
+            goal_pose = entity_pose_to_pose2d(req.goal_pose.pose)
+            header = Header()
+            header.stamp = self.get_clock().now().to_msg()
+            header.frame_id = "map"
+            self.namo_planner.reset_robot_pose(self.namo_planner.agent, robot_pose)
+            self.namo_planner.reset_goal_pose(goal_pose)
+            plan_result = self.namo_planner.compute_plan(header=header)
+            if plan_result:
+                plan, plan_msg = plan_result
+                res.plan = plan_msg
+                self.current_plan = plan
+                self.get_logger().info(f"Finished computing plan")
+            return res
+        finally:
+            self.is_planning = False
 
     def message_to_action(self, msg: NamoAction) -> Action:
         if msg.action_type == NamoAction.WAIT:
@@ -187,6 +192,8 @@ class PlannerNode(Node):
     def synchronize_state(
         self, req: SynchronizeState.Request, res: SynchronizeState.Response
     ):
+        if self.is_planning:
+            return res
         if self.current_plan is not None:
             poses = self.current_plan.get_all_robot_poses()
             start_idx = self.current_plan.get_current_action_index()
@@ -209,7 +216,9 @@ class PlannerNode(Node):
                 action = self.current_plan.pop_next_action()
                 self.namo_planner.step_simulation({self.agent_id: action})
 
-        self.namo_planner.synchronize_state(req.other_observed_robots)
+        self.namo_planner.synchronize_state(
+            req.other_observed_robots, req.observed_obstacles
+        )
         res.result = True
         return res
 
@@ -230,21 +239,25 @@ class PlannerNode(Node):
             else:
                 msg.conflict_type = NamoConflict.OBSTACLE
 
+            self.get_logger().info(f"{self.agent_id} detected conflict: {c}")
             msg.conflict_type = NamoConflict.ROBOT
-
             res.conflicts.append(msg)
         return res
 
     def update_plan(self, req: UpdatePlan.Request, res: UpdatePlan.Response):
-        header = Header()
-        header.stamp = self.get_clock().now().to_msg()
-        header.frame_id = "map"
-        think_result = self.namo_planner.think(header)
-        if think_result:
-            updated_plan, update_plan_msg = think_result
-            self.current_plan = updated_plan
-            res.plan = update_plan_msg
-        return res
+        try:
+            self.is_planning = True
+            header = Header()
+            header.stamp = self.get_clock().now().to_msg()
+            header.frame_id = "map"
+            think_result = self.namo_planner.think(header)
+            if think_result:
+                updated_plan, update_plan_msg = think_result
+                self.current_plan = updated_plan
+                res.plan = update_plan_msg
+            return res
+        finally:
+            self.is_planning = False
 
     def end_postpone(self, req: EndPostpone.Request, res: EndPostpone.Response):
         self.namo_planner.end_postpone()

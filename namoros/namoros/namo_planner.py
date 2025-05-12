@@ -152,8 +152,8 @@ class NamoPlanner:
             self.world = World.load_from_yaml(scenario_file, logger=nammosim_logger)
 
         if not omniscient_obstacle_perception:
-            for obstacle in self.world.get_movable_obstacles():
-                self.world.remove_entity(obstacle.uid)
+            for obs_id in self.world.get_movable_obstacles().keys():
+                self.world.remove_entity(obs_id)
 
         agent = self.world.agents[agent_id]
         if not isinstance(agent, agents.Stilman2005Agent):
@@ -196,6 +196,11 @@ class NamoPlanner:
     def reset_robot_pose(self, agent: agents.Agent, pose: Pose2D):
         agent.move_to_pose(pose)
         self.world.resolve_collisions(agent.uid)
+        self.publish_world()
+
+    def reset_obstacle_pose(self, obstacle: Obstacle, pose: Pose2D):
+        obstacle.move_to_pose(pose)
+        self.world.resolve_collisions(obstacle.uid)
         self.publish_world()
 
     def reset_goal_pose(self, pose: Pose2D):
@@ -283,7 +288,9 @@ class NamoPlanner:
         self.ros_publisher.clear_world()
         self.ros_publisher.publish_world(self.world)
 
-    def synchronize_state(self, other_robots: t.List[NamoEntity]):
+    def synchronize_state(
+        self, other_robots: t.List[NamoEntity], obstacles: t.List[NamoEntity]
+    ):
         self.step_count += 1
 
         for robot in other_robots:
@@ -291,6 +298,18 @@ class NamoPlanner:
                 agent = self.world.agents[robot.entity_id]
                 pose = Pose2D(robot.pose.x, robot.pose.y, robot.pose.angle_degrees)
                 self.reset_robot_pose(agent, pose)
+            else:
+                # TODO
+                pass
+
+        for obstacle in obstacles:
+            existing_obstacles = self.world.get_movable_obstacles()
+            if obstacle.entity_id in existing_obstacles:
+                obs = existing_obstacles[obstacle.entity_id]
+                pose = Pose2D(
+                    obstacle.pose.x, obstacle.pose.y, obstacle.pose.angle_degrees
+                )
+                self.reset_obstacle_pose(obs, pose)
             else:
                 # TODO
                 pass

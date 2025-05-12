@@ -251,7 +251,7 @@ def spawn_obstacles(context: t.Any, *args, **kwargs):  # type: ignore
     ]
 
     actions = []
-    for i, obstacle in enumerate(w.get_movable_obstacles()):
+    for i, obstacle in enumerate(w.get_movable_obstacles().values()):
         obs_node = Node(
             package="ros_gz_sim",
             executable="create",

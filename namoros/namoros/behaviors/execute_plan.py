@@ -83,9 +83,11 @@ class ExecuteNamoPlan(py_trees.behaviour.Behaviour):
                 PlaySound(node=self.node, sound=Sound.CLEANINGSTART),
                 Release(node=self.node, path=path),
                 # Pause(seconds=3),
-                RedetectObstacle(node=self.node, obstacle_id=obstacle_id),
             ],
         )
+
+        if self.node.omniscient_obstacle_perception:
+            root.add_child(RedetectObstacle(node=self.node, obstacle_id=obstacle_id))
         return root
 
     def create_sub_tree(self):
