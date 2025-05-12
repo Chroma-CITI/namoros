@@ -49,4 +49,5 @@ class UpdatePlan(py_trees.behaviour.Behaviour):
     def update(self):
         if self._status == Status.RUNNING:
             self.node.get_logger().info("Updating plan")
+        self.node.publish_status_marker("REPLANNING")
         return self._status

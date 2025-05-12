@@ -60,6 +60,7 @@ from namoros_msgs.msg import NamoPath, NamoEntity, NamoConflict
 from namosim.world.world import World
 from namoros.world_state_tracker import WorldStateTracker
 from std_msgs.msg import Header
+from visualization_msgs.msg import Marker
 
 
 class NamoBehaviorNode(Node):
@@ -155,6 +156,7 @@ class NamoBehaviorNode(Node):
         self.robot_info_timer = self.create_timer(
             1 / 2.0, self.publish_robot_info, MutuallyExclusiveCallbackGroup()
         )
+        self.pub_status = self.create_publisher(Marker, "robot_status", 10)
 
         self.nav = BasicNavigator(namespace=self.get_namespace())
         self.add_or_update_movable_obstacle_cb_group = MutuallyExclusiveCallbackGroup()
@@ -770,3 +772,26 @@ class NamoBehaviorNode(Node):
         footprint = utils.shapely_to_ros_polygon(robot_polygon)
         self.local_footprint_publisher.publish(footprint)
         self.global_footprint_publisher.publish(footprint)
+
+    def publish_status_marker(self, status: str):
+        # Publish marker
+        marker = Marker()
+        marker.header.frame_id = "map"
+        marker.header.stamp = self.get_clock().now().to_msg()
+        marker.id = 0
+        marker.type = Marker.TEXT_VIEW_FACING
+        marker.action = Marker.ADD
+        marker.pose.position.x = 0.0
+        marker.pose.position.y = -2.0
+        marker.pose.position.z = 0.0
+        marker.pose.orientation.x = 0.0
+        marker.pose.orientation.y = 1.0
+        marker.pose.orientation.z = 0.0
+        marker.pose.orientation.w = 0.0
+        marker.scale.z = 0.5
+        marker.color.a = 1.0
+        marker.color.r = 1.0
+        marker.color.g = 1.0
+        marker.color.b = 1.0
+        marker.text = f"Status: {status}"
+        self.pub_status.publish(marker)

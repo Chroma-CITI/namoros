@@ -24,6 +24,7 @@ class Approach(py_trees.behaviour.Behaviour):
             self.node.get_logger().info(
                 f"Advancing towards obstacle. Distance = {self.node.forward_dist_to_obstacle}"
             )
+            self.node.publish_status_marker('APPROACHING OBSTACLE')
         else:
             # stop
             cmd_vel = Twist()
@@ -33,4 +34,5 @@ class Approach(py_trees.behaviour.Behaviour):
             self.status = Status.SUCCESS
             self.node.get_logger().info("Finished advancing towards obstacle")
             self.node.grab(obs_marker_id=self.obstacle_id)
+            self.node.publish_status_marker('GRABBING OBSTACLE')
         return self.status

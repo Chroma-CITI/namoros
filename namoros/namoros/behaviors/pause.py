@@ -21,4 +21,5 @@ class Pause(py_trees.behaviour.Behaviour):
             self.status = py_trees.common.Status.SUCCESS
         else:
             self.status = py_trees.common.Status.RUNNING
+        self.node.publish_status_marker('PAUSING')
         return self.status

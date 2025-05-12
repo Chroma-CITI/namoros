@@ -34,4 +34,5 @@ class BackUp(py_trees.behaviour.Behaviour):
         if self._status == Status.RUNNING:
             self.node.get_logger().info("Backing up")
         self.status = self._status
+        self.node.publish_status_marker('BACKING UP')
         return self.status

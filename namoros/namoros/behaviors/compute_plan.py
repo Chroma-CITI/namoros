@@ -1,9 +1,7 @@
-import typing as t
 from concurrent.futures import Future, ThreadPoolExecutor
 
 from namoros_msgs.msg._namo_plan import NamoPlan
 import py_trees
-from namoros.namo_planner import NamoRosPath
 from py_trees.common import Status
 
 from namoros.behavior_node import NamoBehaviorNode
@@ -51,4 +49,5 @@ class ComputeNamoPlan(py_trees.behaviour.Behaviour):
         if self._status == Status.RUNNING:
             self.node.get_logger().info("Computing NAMO plan")
         self.status = self._status
+        self.node.publish_status_marker('COMPUTING PLAN')
         return self.status

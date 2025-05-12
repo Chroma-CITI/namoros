@@ -1,13 +1,11 @@
 import copy
 import typing as t
-
 import py_trees
 from kobuki_ros_interfaces.msg import Sound
 from namoros_msgs.msg._namo_path import NamoPath
 from py_trees.behaviour import Behaviour
 from py_trees.composites import Selector, Sequence
 from py_trees.trees import BehaviourTree
-
 from namoros.behavior_node import NamoBehaviorNode
 from namoros.behaviors.approach import Approach
 from namoros.behaviors.clear_global_costmap import ClearGlobalCostmap

@@ -19,6 +19,7 @@ class RedetectObstacle(py_trees.behaviour.Behaviour):
         self.start_time = time.time()
 
     def update(self):
+        self.node.publish_status_marker('REDETECTING OBSTACLE')
         elapsed = time.time() - self.start_time
         if elapsed > self.max_seconds:
             self.status = py_trees.common.Status.SUCCESS
