@@ -262,7 +262,7 @@ class NamoPlanner:
 
         if plan:
             self.ros_publisher.publish_robot_plan(plan, self.agent, map=self.world.map)
-            self.logger.info(f"Udated namo plan: {plan.paths}")
+            self.logger.info(f"Updated namo plan: {plan.paths}")
             plan_msg = plan_to_msg(plan, header)
             return plan, plan_msg
 
@@ -276,7 +276,7 @@ class NamoPlanner:
                 grab_start_distance=self.agent.grab_start_distance,
                 rp=None,
                 check_horizon=self.agent.conflict_horizon,
-                exit_early_for_any_conflict=True
+                exit_early_for_any_conflict=True,
             )
         return set()
 
@@ -286,7 +286,7 @@ class NamoPlanner:
         self.ros_publisher.publish_world(self.world)
 
     def publish_world(self):
-        self.ros_publisher.clear_world()
+        # self.ros_publisher.clear_world()
         self.ros_publisher.publish_world(self.world)
 
     def synchronize_state(

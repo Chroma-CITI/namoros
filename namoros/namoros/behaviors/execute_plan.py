@@ -3,6 +3,8 @@ import typing as t
 import py_trees
 from kobuki_ros_interfaces.msg import Sound
 from namoros.behaviors.IgnoreObstacleSync import IgnoreObstacleSync
+from namoros.behaviors.backup import BackUp
+from namoros.behaviors.release import Release
 from namoros_msgs.msg._namo_path import NamoPath
 from py_trees.behaviour import Behaviour
 from py_trees.composites import Selector, Sequence
@@ -17,7 +19,6 @@ from namoros.behaviors.follow_path import FollowPath
 from namoros.behaviors.pause import Pause
 from namoros.behaviors.play_sound import PlaySound
 from namoros.behaviors.redetect_obstacle import RedetectObstacle
-from namoros.behaviors.release import Release
 from namoros.behaviors.TriggerReplan import TriggerReplan
 
 
@@ -82,7 +83,10 @@ class ExecuteNamoPlan(py_trees.behaviour.Behaviour):
             children=[
                 PlaySound(node=self.node, sound=Sound.CLEANINGSTART),
                 Release(node=self.node, path=path),
-                IgnoreObstacleSync(node=self.node, obstacle_id=obstacle_id, unignore=True),
+                BackUp(node=self.node, distance=self.node.agent.grab_start_distance),
+                IgnoreObstacleSync(
+                    node=self.node, obstacle_id=obstacle_id, unignore=True
+                ),
                 # Pause(seconds=3),
             ],
         )
@@ -115,7 +119,6 @@ class ExecuteNamoPlan(py_trees.behaviour.Behaviour):
             follow_path = FollowPath(
                 node=self.node,
                 namo_path=namo_path,
-                synchronize_planner=True,
                 is_evasion=namo_path.is_evasion,
             )
 

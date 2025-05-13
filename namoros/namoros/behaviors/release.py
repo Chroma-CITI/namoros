@@ -75,13 +75,13 @@ class Release(py_trees.behaviour.Behaviour):
     def initialise(self):
         if not self.path.obstacle_id:
             raise Exception("Path has no obstacle id")
-        self._status = Status.RUNNING
+        self._status = Status.SUCCESS
         self.node.release()
-        robot_pose = self.node.lookup_robot_pose()
-        if robot_pose is None:
-            raise Exception("No robot pose")
-        release_path = self.get_release_path(robot_pose)
-        self.follow_path(release_path)
+        # robot_pose = self.node.lookup_robot_pose()
+        # if robot_pose is None:
+        #     raise Exception("No robot pose")
+        # release_path = self.get_release_path(robot_pose)
+        # self.follow_path(release_path)
 
     def get_release_path(self, robot_pose: PoseStamped):
         path_msg = Path()
@@ -92,7 +92,5 @@ class Release(py_trees.behaviour.Behaviour):
         return path_msg
 
     def update(self):
-        if self._status == Status.RUNNING:
-            self.node.get_logger().info("Backing up")
         self.status = self._status
         return self.status

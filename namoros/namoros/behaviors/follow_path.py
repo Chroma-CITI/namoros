@@ -13,14 +13,12 @@ class FollowPath(py_trees.behaviour.Behaviour):
         self,
         node: NamoBehaviorNode,
         namo_path: NamoPath,
-        synchronize_planner: bool = False,
         is_evasion: bool = False,
     ):
         super().__init__(name="follow_path")
         self.node = node
         self.namo_path = namo_path
         self._status: Status = Status.INVALID
-        self.synchronize_planner = synchronize_planner
         self.is_evasion = is_evasion
 
     def callback(self, future: Future):
@@ -52,8 +50,6 @@ class FollowPath(py_trees.behaviour.Behaviour):
             self.node.get_logger().info(
                 "Following path." if not self.is_evasion else "Evading."
             )
-            if self.synchronize_planner:
-                self.node.synchronize_planner()
         self.status = self._status
         self.node.publish_status_marker(
             "FOLLOWING PATH" if not self.is_evasion else "EVADING"

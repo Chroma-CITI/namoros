@@ -28,7 +28,7 @@ from namosim.navigation.basic_actions import (
     Release,
     Action,
 )
-from rclpy.callback_groups import ReentrantCallbackGroup
+from rclpy.callback_groups import ReentrantCallbackGroup, MutuallyExclusiveCallbackGroup
 from namosim.navigation.navigation_plan import Plan
 from namosim.navigation.conflict import ConflictType
 
@@ -90,7 +90,7 @@ class PlannerNode(Node):
             SynchronizeState,
             "namo_planner/synchronize_state",
             self.synchronize_state,
-            callback_group=self.sync_cb_group,
+            callback_group=MutuallyExclusiveCallbackGroup(),
         )
         self.srv_detect_conflicts = self.create_service(
             DetectConflicts,

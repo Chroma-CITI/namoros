@@ -62,6 +62,7 @@ from namosim.world.world import World
 from namoros.world_state_tracker import WorldStateTracker
 from std_msgs.msg import Header
 from visualization_msgs.msg import Marker
+from namosim.agents.stilman_2005_agent import Stilman2005Agent
 
 
 class NamoBehaviorNode(Node):
@@ -91,14 +92,19 @@ class NamoBehaviorNode(Node):
             world = World.load_from_svg(self.scenario_file)
         else:
             world = World.load_from_yaml(self.scenario_file)
-        self.agent = world.agents[self.agent_id]
+        self.agent: Stilman2005Agent = world.agents[self.agent_id]
         self.robot_radius = world.agents[self.agent_id].circumscribed_radius
 
         self.main_cb_group = MutuallyExclusiveCallbackGroup()
         self.namo_cb_group = ReentrantCallbackGroup()
 
         # actions
-        self.follow_path_client = ActionClient(self, FollowPath, "follow_path")
+        self.follow_path_client = ActionClient(
+            self,
+            FollowPath,
+            "follow_path",
+            callback_group=MutuallyExclusiveCallbackGroup(),
+        )
         self.backup_client = ActionClient(self, BackUp, "backup")
         self.drive_on_heading_client = ActionClient(
             self, DriveOnHeading, "drive_on_heading"
@@ -194,7 +200,7 @@ class NamoBehaviorNode(Node):
         self.srv_synchronize_planner = self.create_client(
             SynchronizeState,
             "namo_planner/synchronize_state",
-            callback_group=self.sync_cb_group,
+            callback_group=MutuallyExclusiveCallbackGroup(),
         )
         self.srv_detect_conflicts = self.create_client(
             DetectConflicts,
