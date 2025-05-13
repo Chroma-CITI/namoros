@@ -28,7 +28,7 @@ from namosim.navigation.basic_actions import (
     Release,
     Action,
 )
-from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
+from rclpy.callback_groups import ReentrantCallbackGroup
 from namosim.navigation.navigation_plan import Plan
 from namosim.navigation.conflict import ConflictType
 
@@ -85,30 +85,30 @@ class PlannerNode(Node):
             self.get_entity_polygon_callback,
             callback_group=self.services_cb_group,
         )
-        self.sync_cb_group = MutuallyExclusiveCallbackGroup()
+        self.sync_cb_group = ReentrantCallbackGroup()
         self.srv_synchronize_state = self.create_service(
             SynchronizeState,
             "namo_planner/synchronize_state",
             self.synchronize_state,
-            callback_group=self.services_cb_group,
+            callback_group=self.sync_cb_group,
         )
         self.srv_detect_conflicts = self.create_service(
             DetectConflicts,
             "namo_planner/detect_conflicts",
             self.detect_conflicts,
-            callback_group=self.services_cb_group,
+            callback_group=self.sync_cb_group,
         )
         self.srv_update_plan = self.create_service(
             UpdatePlan,
             "namo_planner/update_plan",
             self.update_plan,
-            callback_group=self.services_cb_group,
+            callback_group=self.sync_cb_group,
         )
         self.srv_end_postpone = self.create_service(
             EndPostpone,
             "namo_planner/end_postpone",
             self.end_postpone,
-            callback_group=self.services_cb_group,
+            callback_group=self.sync_cb_group,
         )
 
         # state

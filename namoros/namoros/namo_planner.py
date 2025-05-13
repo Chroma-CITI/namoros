@@ -276,6 +276,7 @@ class NamoPlanner:
                 grab_start_distance=self.agent.grab_start_distance,
                 rp=None,
                 check_horizon=self.agent.conflict_horizon,
+                exit_early_for_any_conflict=True
             )
         return set()
 
@@ -302,7 +303,11 @@ class NamoPlanner:
                 # TODO
                 pass
 
+        held_obstacle = self.world.get_agent_held_obstacle(self.agent.uid)
         for obstacle in obstacles:
+            if held_obstacle and held_obstacle.uid == obstacle.uid:
+                # Do not update pose of the obstacle the robot is currently manipulating
+                continue
             existing_obstacles = self.world.get_movable_obstacles()
             if obstacle.entity_id in existing_obstacles:
                 obs = existing_obstacles[obstacle.entity_id]

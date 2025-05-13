@@ -2,6 +2,7 @@ import copy
 import typing as t
 import py_trees
 from kobuki_ros_interfaces.msg import Sound
+from namoros.behaviors.IgnoreObstacleSync import IgnoreObstacleSync
 from namoros_msgs.msg._namo_path import NamoPath
 from py_trees.behaviour import Behaviour
 from py_trees.composites import Selector, Sequence
@@ -59,6 +60,7 @@ class ExecuteNamoPlan(py_trees.behaviour.Behaviour):
             name="grab_seq",
             memory=True,
             children=[
+                IgnoreObstacleSync(node=self.node, obstacle_id=obstacle_id),
                 PlaySound(node=self.node, sound=Sound.CLEANINGSTART),
                 ClearGlobalCostmap(node=self.node),
                 ClearLocalCostmap(node=self.node),
@@ -80,6 +82,7 @@ class ExecuteNamoPlan(py_trees.behaviour.Behaviour):
             children=[
                 PlaySound(node=self.node, sound=Sound.CLEANINGSTART),
                 Release(node=self.node, path=path),
+                IgnoreObstacleSync(node=self.node, obstacle_id=obstacle_id, unignore=True),
                 # Pause(seconds=3),
             ],
         )

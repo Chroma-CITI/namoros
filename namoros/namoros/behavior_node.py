@@ -6,6 +6,7 @@ import typing as t
 from geometry_msgs.msg import Polygon, Point, Pose, PoseArray, PoseWithCovarianceStamped
 from kobuki_ros_interfaces.msg import BumperEvent
 from kobuki_ros_interfaces.msg._sound import Sound
+import numpy as np
 from namoros_msgs.msg._namo_plan import NamoPlan
 from namoros.data_models import load_namoros_config
 from namoros.movable_obstacle_tracker import MovableObstacleTracker
@@ -238,45 +239,14 @@ class NamoBehaviorNode(Node):
         msg.pose.pose.orientation.z = orientation[2]
         msg.pose.pose.orientation.w = orientation[3]
 
+        variance_xy = 0.1  # Standard deviation for x, y (meters)
+        variance_yaw = 0.05  # Standard deviation for yaw (radians)
+
         # Set covariance (example: low uncertainty)
-        msg.pose.covariance = [
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-        ]
+        msg.pose.covariance = np.zeros(36)  # 6x6 matrix flattened
+        msg.pose.covariance[0] = variance_xy**2  # Variance in x
+        msg.pose.covariance[7] = variance_xy**2  # Variance in y
+        msg.pose.covariance[35] = variance_yaw**2  # Variance in yaw
 
         self.pub_init_pose.publish(msg)
         self.get_logger().info(

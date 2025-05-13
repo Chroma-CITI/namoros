@@ -49,5 +49,5 @@ class ComputeNamoPlan(py_trees.behaviour.Behaviour):
         if self._status == Status.RUNNING:
             self.node.get_logger().info("Computing NAMO plan")
         self.status = self._status
-        self.node.publish_status_marker('COMPUTING PLAN')
+        self.node.publish_status_marker("COMPUTING PLAN")
         return self.status

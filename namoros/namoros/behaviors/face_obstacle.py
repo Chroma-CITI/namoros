@@ -48,5 +48,5 @@ class FaceObstacle(py_trees.behaviour.Behaviour):
         if self._status == Status.RUNNING:
             self.node.get_logger().info("Turning towards obstacle")
         self.status = self._status
-        self.node.publish_status_marker('FACING OBSTACLE')
+        self.node.publish_status_marker("FACING OBSTACLE")
         return self.status

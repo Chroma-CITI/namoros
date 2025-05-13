@@ -14,5 +14,5 @@ class DetectConflicts(py_trees.behaviour.Behaviour):
 
     def update(self):
         self.node.detect_conflicts()
-        self.node.publish_status_marker('CONFLICT DETECTED')
+        self.node.publish_status_marker("CONFLICT DETECTED")
         return self.status

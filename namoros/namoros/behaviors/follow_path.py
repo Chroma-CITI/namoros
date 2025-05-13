@@ -55,5 +55,7 @@ class FollowPath(py_trees.behaviour.Behaviour):
             if self.synchronize_planner:
                 self.node.synchronize_planner()
         self.status = self._status
-        self.node.publish_status_marker('FOLLOWING PATH')
+        self.node.publish_status_marker(
+            "FOLLOWING PATH" if not self.is_evasion else "EVADING"
+        )
         return self.status
