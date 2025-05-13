@@ -87,11 +87,11 @@ class ExecuteNamoPlan(py_trees.behaviour.Behaviour):
                 IgnoreObstacleSync(
                     node=self.node, obstacle_id=obstacle_id, unignore=True
                 ),
-                # Pause(seconds=3),
+                Pause(node=self.node, seconds=2),
             ],
         )
 
-        if self.node.omniscient_obstacle_perception:
+        if not self.node.omniscient_obstacle_perception:
             root.add_child(RedetectObstacle(node=self.node, obstacle_id=obstacle_id))
         return root
 
