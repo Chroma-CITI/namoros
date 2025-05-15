@@ -117,6 +117,11 @@ class ExecuteNamoPlan(py_trees.behaviour.Behaviour):
                 root.add_child(grab)
                 # remove the pre-grab and post-release poses since those are executed manually
                 nav_path.poses = nav_path.poses[1:-1]  # type: ignore
+            else:
+                root.add_child(
+                    Release(node=self.node)
+                )  # Add a release action at the start of each transit path, to make sure robot has released obstacle
+
             follow_path = FollowPath(
                 node=self.node,
                 namo_path=namo_path,
