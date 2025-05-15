@@ -118,16 +118,16 @@ class NamoBehaviorNode(Node):
 
         # subscribers
         self.goal_pose_sub = self.create_subscription(
-            PoseStamped, f"goal_pose_namo", self.goal_pose_callback, 10
+            PoseStamped, f"goal_pose_namo", self.goal_pose_callback, 1
         )
         self.sub_bumper = self.create_subscription(
-            BumperEvent, "events/bumper", self.bumper_callback, 10
+            BumperEvent, "events/bumper", self.bumper_callback, 1
         )
         self.sub_laser_scan = self.create_subscription(
-            LaserScan, "scan", self.laser_scan_callback, 10
+            LaserScan, "scan", self.laser_scan_callback, 1
         )
         self.sub_robot_info = self.create_subscription(
-            NamoEntity, "/namo/robots", self._robot_info_callback, 10
+            NamoEntity, "/namo/robots", self._robot_info_callback, 1
         )
 
         if self.is_sim:
@@ -139,32 +139,32 @@ class NamoBehaviorNode(Node):
                         PoseArray,
                         f"/model/{obstacle.name}/pose",
                         self.create_obstacle_pose_callback(obstacle.name),
-                        10,
+                        1,
                         callback_group=self.main_cb_group,
                     )
                 )
 
         # publishers
         self.pub_init_pose = self.create_publisher(
-            PoseWithCovarianceStamped, "initialpose", 10
+            PoseWithCovarianceStamped, "initialpose", 1
         )
-        self.grab_publisher = self.create_publisher(ParamVec, "/namo_grab", 10)
-        self.release_publisher = self.create_publisher(ParamVec, "/namo_release", 10)
-        self.pub_sound = self.create_publisher(Sound, "/commands/sound", 10)
+        self.grab_publisher = self.create_publisher(ParamVec, "/namo_grab", 1)
+        self.release_publisher = self.create_publisher(ParamVec, "/namo_release", 1)
+        self.pub_sound = self.create_publisher(Sound, "/commands/sound", 1)
         self.local_footprint_publisher = self.create_publisher(
-            Polygon, "local_costmap/footprint", 10
+            Polygon, "local_costmap/footprint", 1
         )
         self.global_footprint_publisher = self.create_publisher(
-            Polygon, "global_costmap/footprint", 10
+            Polygon, "global_costmap/footprint", 1
         )
-        self.path_publisher = self.create_publisher(Path, "current_namo_path", 10)
-        self.pub_cmd_vel = self.create_publisher(Twist, "cmd_vel", 10)
-        self.pub_robot_info = self.create_publisher(NamoEntity, "/namo/robots", 10)
+        self.path_publisher = self.create_publisher(Path, "current_namo_path", 1)
+        self.pub_cmd_vel = self.create_publisher(Twist, "cmd_vel", 1)
+        self.pub_robot_info = self.create_publisher(NamoEntity, "/namo/robots", 1)
         self.robot_info_timer = self.create_timer(
             1 / 2.0, self.publish_robot_info, MutuallyExclusiveCallbackGroup()
         )
         self.pub_status = self.create_publisher(
-            Marker, "robot_status", 10, callback_group=MutuallyExclusiveCallbackGroup()
+            Marker, "robot_status", 1, callback_group=MutuallyExclusiveCallbackGroup()
         )
 
         self.nav = BasicNavigator(namespace=self.get_namespace())
@@ -481,8 +481,7 @@ class NamoBehaviorNode(Node):
         if self.omniscient_obstacle_perception:
             for obstacle in self.world_state_tracker.obstacles.values():
                 req.observed_obstacles.append(obstacle)
-
-        self.srv_synchronize_planner.call_async(req)
+        self.srv_synchronize_planner.call(req)
 
     def detect_conflicts(self):
         req = DetectConflicts.Request()

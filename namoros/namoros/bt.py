@@ -13,6 +13,7 @@ from namoros.behaviors.execute_plan import ExecuteNamoPlan
 from namoros.behaviors.interrupt_robot import InterruptRobot
 from namoros.behaviors.new_obstacle_detected import NewObstacleGuard
 from namoros.behaviors.play_sound import PlaySound
+from namoros.behaviors.release import Release
 from namoros.behaviors.replan_guard import ReplanGuard
 from namoros.behaviors.synchronize_planner import SynchronizePlanner
 from namoros.behaviors.update_plan_guard import UpdatePlanGuard
@@ -68,6 +69,7 @@ def create_namo_tree(node: NamoBehaviorNode) -> Behaviour:
         memory=True,
         children=[
             InterruptRobot(node=node),
+            Release(node=node),
             ComputeNamoPlan(node=node),
             excute_plan_root,
         ],

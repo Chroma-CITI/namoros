@@ -59,7 +59,7 @@ class PlannerNode(Node):
         self.namo_planner.publish_world()
         self.services_cb_group = ReentrantCallbackGroup()
         self.sub_map = self.create_subscription(
-            OccupancyGrid, "map", self.map_callback, 10
+            OccupancyGrid, "map", self.map_callback, 1
         )
         self.srv_add_obstacle = self.create_service(
             AddOrUpdateMovableObstacle,

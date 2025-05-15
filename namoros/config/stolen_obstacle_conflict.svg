@@ -37,9 +37,9 @@
       <behavior
          type="stilman_2005_behavior">
         <parameters
-           use_social_cost="true"
+           use_social_cost="false"
            robot_rotation_unit_angle="15.0"
-           manip_search_bound_percentage="0.05"
+           manip_search_bound_percentage="0.2"
            push_only="false"
            drive_type="differential" />
       </behavior>
@@ -53,7 +53,7 @@
         <parameters
            use_social_cost="true"
            robot_rotation_unit_angle="15.0"
-           manip_search_bound_percentage="0.05"
+           manip_search_bound_percentage="0.2"
            push_only="false"
            drive_type="differential" />
       </behavior>
@@ -275,7 +275,7 @@
     <path
        id="obstacle_0"
        style="fill:#ff7f2a;fill-rule:evenodd;stroke-width:0.0211664"
-       d="m 557.89804,359.49628 h 40 v 40 h -40 z"
+       d="m 560,360 h 40 v 40 h -40 z"
        type="movable" />
   </g>
 </svg>

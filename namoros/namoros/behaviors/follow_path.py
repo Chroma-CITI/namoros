@@ -50,6 +50,7 @@ class FollowPath(py_trees.behaviour.Behaviour):
             else:
                 self._status = Status.FAILURE
                 self.node.get_logger().info(f"FollowPath failed with result: {result}")
+                self.node.trigger_a_replan()
         except Exception as e:
             self.logger.error("FollowPath failed with error: {e}")
             self._status = Status.FAILURE

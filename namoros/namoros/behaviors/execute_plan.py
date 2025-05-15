@@ -34,6 +34,7 @@ class ExecuteNamoPlan(py_trees.behaviour.Behaviour):
             memory=True,
             children=[
                 DetectConflictsGuard(node=node),
+                Release(node=self.node),
                 TriggerReplan(node=node, update_plan=True),
             ],
         )
@@ -82,7 +83,7 @@ class ExecuteNamoPlan(py_trees.behaviour.Behaviour):
             memory=True,
             children=[
                 PlaySound(node=self.node, sound=Sound.CLEANINGSTART),
-                Release(node=self.node, path=path),
+                Release(node=self.node),
                 BackUp(node=self.node, distance=self.node.agent.grab_start_distance),
                 IgnoreObstacleSync(
                     node=self.node, obstacle_id=obstacle_id, unignore=True

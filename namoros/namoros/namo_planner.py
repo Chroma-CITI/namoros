@@ -277,7 +277,7 @@ class NamoPlanner:
                 rp=None,
                 check_horizon=self.agent.conflict_horizon,
                 exit_early_for_any_conflict=True,
-                apply_strict_horizon=True,
+                apply_strict_horizon=False,
             )
         return set()
 
