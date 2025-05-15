@@ -151,7 +151,7 @@ def spawn_robots(context: t.Any, *args, **kwargs):  # type: ignore
                 ("/tf_static", "tf_static"),
                 ("/map", "map"),
                 ("/initialpose", "initialpose"),
-                ("/trajectories", "trajectories"),
+                # ("/trajectories", "trajectories"),
                 ("/plan", "plan"),
                 ("/goal_pose", "goal_pose"),
                 ("/scan", "scan"),

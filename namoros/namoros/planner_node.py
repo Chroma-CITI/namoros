@@ -85,12 +85,12 @@ class PlannerNode(Node):
             self.get_entity_polygon_callback,
             callback_group=self.services_cb_group,
         )
-        self.sync_cb_group = ReentrantCallbackGroup()
+        self.sync_cb_group = MutuallyExclusiveCallbackGroup()
         self.srv_synchronize_state = self.create_service(
             SynchronizeState,
             "namo_planner/synchronize_state",
             self.synchronize_state,
-            callback_group=MutuallyExclusiveCallbackGroup(),
+            callback_group=self.sync_cb_group,
         )
         self.srv_detect_conflicts = self.create_service(
             DetectConflicts,

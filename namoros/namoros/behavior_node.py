@@ -163,7 +163,9 @@ class NamoBehaviorNode(Node):
         self.robot_info_timer = self.create_timer(
             1 / 2.0, self.publish_robot_info, MutuallyExclusiveCallbackGroup()
         )
-        self.pub_status = self.create_publisher(Marker, "robot_status", 10)
+        self.pub_status = self.create_publisher(
+            Marker, "robot_status", 10, callback_group=MutuallyExclusiveCallbackGroup()
+        )
 
         self.nav = BasicNavigator(namespace=self.get_namespace())
         self.add_or_update_movable_obstacle_cb_group = MutuallyExclusiveCallbackGroup()
@@ -207,11 +209,6 @@ class NamoBehaviorNode(Node):
             "namo_planner/detect_conflicts",
             callback_group=MutuallyExclusiveCallbackGroup(),
         )
-        self.srv_get_entity_polygon = self.create_client(
-            GetEntityPolygon,
-            "namo_planner/get_entity_polygon",
-            callback_group=self.namo_cb_group,
-        )
 
         # transform listener
         self.tf_buffer = Buffer(cache_time=rclpy.time.Duration(seconds=20))
@@ -245,8 +242,8 @@ class NamoBehaviorNode(Node):
         msg.pose.pose.orientation.z = orientation[2]
         msg.pose.pose.orientation.w = orientation[3]
 
-        variance_xy = 0.1  # Standard deviation for x, y (meters)
-        variance_yaw = 0.05  # Standard deviation for yaw (radians)
+        variance_xy = 0.01  # Standard deviation for x, y (meters)
+        variance_yaw = 0.01  # Standard deviation for yaw (radians)
 
         # Set covariance (example: low uncertainty)
         msg.pose.covariance = np.zeros(36)  # 6x6 matrix flattened
@@ -467,6 +464,7 @@ class NamoBehaviorNode(Node):
         res: SimulatePath.Response = self.srv_simulate_path.call(req)
 
     def synchronize_planner(self):
+        self.get_logger().info("synchronizing planner state")
         robot_pose = self.lookup_robot_pose()
         if robot_pose is None:
             self.get_logger().warn("Failed to lookup robot pose")
@@ -484,7 +482,7 @@ class NamoBehaviorNode(Node):
             for obstacle in self.world_state_tracker.obstacles.values():
                 req.observed_obstacles.append(obstacle)
 
-        self.srv_synchronize_planner.call(req)
+        self.srv_synchronize_planner.call_async(req)
 
     def detect_conflicts(self):
         req = DetectConflicts.Request()

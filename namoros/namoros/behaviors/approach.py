@@ -6,7 +6,7 @@ from namoros.behavior_node import NamoBehaviorNode
 
 class Approach(py_trees.behaviour.Behaviour):
     def __init__(
-        self, node: NamoBehaviorNode, obstacle_id: str, min_distance: float = 0.23
+        self, node: NamoBehaviorNode, obstacle_id: str, min_distance: float = 0.25
     ):
         super().__init__(name="Approach")
         self.node = node

@@ -277,6 +277,7 @@ class NamoPlanner:
                 rp=None,
                 check_horizon=self.agent.conflict_horizon,
                 exit_early_for_any_conflict=True,
+                apply_strict_horizon=True,
             )
         return set()
 
@@ -305,7 +306,7 @@ class NamoPlanner:
 
         held_obstacle = self.world.get_agent_held_obstacle(self.agent.uid)
         for obstacle in obstacles:
-            if held_obstacle and held_obstacle.uid == obstacle.uid:
+            if held_obstacle and held_obstacle.uid == obstacle.entity_id:
                 # Do not update pose of the obstacle the robot is currently manipulating
                 continue
             existing_obstacles = self.world.get_movable_obstacles()

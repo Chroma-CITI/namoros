@@ -87,7 +87,7 @@ class ExecuteNamoPlan(py_trees.behaviour.Behaviour):
                 IgnoreObstacleSync(
                     node=self.node, obstacle_id=obstacle_id, unignore=True
                 ),
-                Pause(node=self.node, seconds=2),
+                Pause(node=self.node, seconds=2.0),
             ],
         )
 
