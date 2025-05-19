@@ -8,6 +8,7 @@ from py_trees_ros.trees import BehaviourTree
 from rclpy.executors import MultiThreadedExecutor
 
 from namoros.behavior_node import NamoBehaviorNode
+from namoros.behaviors.ComputePlan import ComputePlan
 from namoros.behaviors.clear_new_movables import ClearNewMovables
 from namoros.behaviors.execute_plan import ExecuteNamoPlan
 from namoros.behaviors.interrupt_robot import InterruptRobot
@@ -18,7 +19,6 @@ from namoros.behaviors.replan_guard import ReplanGuard
 from namoros.behaviors.synchronize_planner import SynchronizePlanner
 from namoros.behaviors.update_plan_guard import UpdatePlanGuard
 from namoros.behaviors.UpdatePlan import UpdatePlan
-from namoros.behaviors.compute_plan import ComputeNamoPlan
 
 from namoros.behaviors.wait_for_full_obstacle_detection import (
     WaitForFullObstacleDetection,
@@ -70,7 +70,7 @@ def create_namo_tree(node: NamoBehaviorNode) -> Behaviour:
         children=[
             InterruptRobot(node=node),
             Release(node=node),
-            ComputeNamoPlan(node=node),
+            ComputePlan(node=node),
             excute_plan_root,
         ],
     )

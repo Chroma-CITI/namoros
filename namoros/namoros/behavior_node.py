@@ -50,8 +50,6 @@ import shapely.geometry as geom
 from shapely import affinity
 from namoros_msgs.srv import (
     AddOrUpdateMovableObstacle,
-    ComputePlan,
-    UpdatePlan,
     SimulatePath,
     GetEntityPolygon,
     SynchronizeState,
@@ -63,6 +61,7 @@ from namoros.world_state_tracker import WorldStateTracker
 from std_msgs.msg import Header
 from visualization_msgs.msg import Marker
 from namosim.agents.stilman_2005_agent import Stilman2005Agent
+from namoros_msgs.action import ComputePlan
 
 
 class NamoBehaviorNode(Node):
@@ -181,16 +180,6 @@ class NamoBehaviorNode(Node):
             AddOrUpdateMovableObstacle,
             "namo_planner/add_or_update_movable_obstacle",
             callback_group=self.add_or_update_movable_obstacle_cb_group,
-        )
-        self.srv_compute_plan = self.create_client(
-            ComputePlan,
-            "namo_planner/compute_plan",
-            callback_group=ReentrantCallbackGroup(),
-        )
-        self.srv_update_plan = self.create_client(
-            UpdatePlan,
-            "namo_planner/update_plan",
-            callback_group=ReentrantCallbackGroup(),
         )
         self.srv_simulate_path = self.create_client(
             SimulatePath,
@@ -409,7 +398,7 @@ class NamoBehaviorNode(Node):
         )
         return final_result_future
 
-    def get_plan(self):
+    def compose_compute_plan_goal_msg(self) -> ComputePlan.Goal:
         if not self.goal_pose:
             raise Exception("No goal pose")
         try:
@@ -423,19 +412,13 @@ class NamoBehaviorNode(Node):
             raise ex
         robot_pose = utils.transform_to_pose(robot_tf)
 
-        req = ComputePlan.Request()
-        req.start_pose = robot_pose
-        req.goal_pose = self.goal_pose
+        goal = ComputePlan.Goal()
+        goal.start_pose = robot_pose
+        goal.goal_pose = self.goal_pose
         self.get_logger().info(
             f"{self.agent_id} computing plan to goal {self.goal_pose}"
         )
-        res: ComputePlan.Response = self.srv_compute_plan.call(req)
-        return res.plan
-
-    def update_plan(self):
-        req = UpdatePlan.Request()
-        res: UpdatePlan.Response = self.srv_update_plan.call(req)
-        return res.plan
+        return goal
 
     def get_entity_polygon(self, uid: str):
         req = GetEntityPolygon.Request()

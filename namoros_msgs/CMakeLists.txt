@@ -11,13 +11,14 @@ find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
+find_package(action_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/NamoPath.msg"
   "msg/NamoPlan.msg"
   "msg/NamoPose.msg"
   "msg/NamoAction.msg"
-  "msg/ComputePlan.srv"
+  "msg/ComputePlan.action"
   "msg/SimulatePath.srv"
   "msg/GetEntityPolygon.srv"
   "msg/AddOrUpdateMovableObstacle.srv"
@@ -26,9 +27,9 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/NamoConflict.msg"
   "msg/DetectConflicts.srv"
   "msg/ComputeEvasionPlan.srv"
-  "msg/UpdatePlan.srv"
+  "msg/UpdatePlan.action"
   "msg/EndPostpone.srv"
-  DEPENDENCIES std_msgs geometry_msgs nav_msgs
+  DEPENDENCIES std_msgs geometry_msgs nav_msgs action_msgs
 )
 
 if(BUILD_TESTING)
