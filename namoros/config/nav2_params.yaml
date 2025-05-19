@@ -1,11 +1,11 @@
 amcl:
   ros__parameters:
     use_sim_time: True
-    alpha1: 0.3 # Translational noise (x)
-    alpha2: 0.3 # Translational noise (y)
-    alpha3: 0.3 # Rotational noise (yaw)
-    alpha4: 0.3 # Angular noise
-    alpha5: 0.3 # Scaling noise
+    alpha1: 0.2 # Translational noise (x)
+    alpha2: 0.2 # Translational noise (y)
+    alpha3: 0.2 # Rotational noise (yaw)
+    alpha4: 0.2 # Angular noise
+    alpha5: 0.2 # Scaling noise
     base_frame_id: "base_link"
     beam_skip_distance: 0.5
     beam_skip_error_threshold: 0.9
@@ -16,7 +16,7 @@ amcl:
     laser_likelihood_max_dist: 2.0
     laser_max_range: 100.0
     laser_min_range: -1.0
-    laser_model_type: "likelihood_field"
+    laser_model_type: "likelihood_field_prob"
     max_beams: 120
     max_particles: 2000
     min_particles: 1000
@@ -130,8 +130,8 @@ controller_server:
     goal_checker:
       stateful: True
       plugin: "nav2_controller::StoppedGoalChecker"
-      xy_goal_tolerance: 0.1
-      yaw_goal_tolerance: 0.1
+      xy_goal_tolerance: 0.08
+      yaw_goal_tolerance: 0.05
       trans_stopped_velocity: 0.05
       rot_stopped_velocity: 0.05
 
@@ -181,7 +181,7 @@ controller_server:
         enabled: true
         cost_power: 1
         cost_weight: 5.0
-        threshold_to_consider: 1.4
+        threshold_to_consider: 0.5
       GoalAngleCritic:
         enabled: true
         cost_power: 1
@@ -195,7 +195,7 @@ controller_server:
         consider_footprint: true
         collision_cost: 10.0
         collision_margin_distance: 0.0
-        near_goal_distance: 0.5
+        near_goal_distance: 0.3
         inflation_radius: 0.15 # (only in Humble)
         cost_scaling_factor: 10.0 # (only in Humble)
       PathAlignCritic:
@@ -210,15 +210,15 @@ controller_server:
       PathFollowCritic:
         enabled: true
         cost_power: 1
-        cost_weight: 20.0
+        cost_weight: 18.0
         offset_from_furthest: 5
         threshold_to_consider: 0.2
       PathAngleCritic:
         enabled: true
         cost_power: 1
-        cost_weight: 2.0
+        cost_weight: 4.0
         offset_from_furthest: 4
-        threshold_to_consider: 0.5
+        threshold_to_consider: 0.2
         max_angle_to_furthest: 1.0
         mode: 2
 

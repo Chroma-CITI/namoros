@@ -128,6 +128,12 @@ class NamoBehaviorNode(Node):
         self.sub_robot_info = self.create_subscription(
             NamoEntity, "/namo/robots", self._robot_info_callback, 1
         )
+        self.sub_grab = self.create_subscription(
+            ParamVec, "/namo_grab", self._namo_grab_callback, 1
+        )
+        self.sub_release = self.create_subscription(
+            ParamVec, "/namo_release", self._namo_release_callback, 1
+        )
 
         if self.is_sim:
             # subscriptions
@@ -263,7 +269,6 @@ class NamoBehaviorNode(Node):
         self.obstacle_poses: t.Dict[str, Pose] = {}
         self.plan: NamoPlan | None = None
         self.world_state_tracker = WorldStateTracker()
-        self.conflicts: t.List[NamoConflict] = []
 
     def init_goals(self):
         goal = self.agent.get_current_or_next_goal()
@@ -288,6 +293,7 @@ class NamoBehaviorNode(Node):
         self.replan_flag = True
         self.update_plan_flag = False
         self.replan_count += 1
+        self.world_state_tracker.clear()
 
     def trigger_update_plan(self):
         self.get_logger().info("Triggering a plan update.")
@@ -314,6 +320,36 @@ class NamoBehaviorNode(Node):
         if entity.entity_id == self.agent_id:
             return
         self.world_state_tracker.update_robot(entity)
+
+    def _namo_grab_callback(self, msg: ParamVec):
+        robot_name: str | None = None
+        obstacle_name: str | None = None
+        for param in msg.params:
+            param = t.cast(Parameter, param)
+            if param.name == "robot_name":
+                robot_name = param.value.string_value
+            elif param.name == "obstacle_name":
+                obstacle_name = param.value.string_value
+
+        if robot_name and robot_name != self.agent_id and obstacle_name is not None:
+            self.world_state_tracker.grabbed_obstacle(
+                robot_id=robot_name, obstacle_id=obstacle_name
+            )
+
+    def _namo_release_callback(self, msg: ParamVec):
+        robot_name: str | None = None
+        obstacle_name: str | None = None
+        for param in msg.params:
+            param = t.cast(Parameter, param)
+            if param.name == "robot_name":
+                robot_name = param.value.string_value
+            elif param.name == "obstacle_name":
+                obstacle_name = param.value.string_value
+
+        if robot_name and robot_name != self.agent_id and obstacle_name is not None:
+            self.world_state_tracker.released_obstacle(
+                robot_id=robot_name, obstacle_id=obstacle_name
+            )
 
     def publish_robot_info(self):
         entity = NamoEntity()
@@ -447,7 +483,7 @@ class NamoBehaviorNode(Node):
         res: SimulatePath.Response = self.srv_simulate_path.call(req)
 
     def synchronize_planner(self):
-        self.get_logger().info("synchronizing planner state")
+        self.get_logger().info("Synchronizing planner state")
         robot_pose = self.lookup_robot_pose()
         if robot_pose is None:
             self.get_logger().warn("Failed to lookup robot pose")
@@ -459,17 +495,22 @@ class NamoBehaviorNode(Node):
         req.observed_robot_pose.angle_degrees = robot_pose.degrees
 
         for other_robot in self.world_state_tracker.robots.values():
+            if other_robot.entity_id in self.world_state_tracker.robot_to_obstacle:
+                other_robot.holding_other_entity_id = (
+                    self.world_state_tracker.robot_to_obstacle[other_robot.entity_id]
+                )
             req.other_observed_robots.append(other_robot)
 
         if self.omniscient_obstacle_perception:
             for obstacle in self.world_state_tracker.obstacles.values():
                 req.observed_obstacles.append(obstacle)
+
         self.srv_synchronize_planner.call(req)
 
     def detect_conflicts(self):
+        self.get_logger().info("Detecting conflicts")
         req = DetectConflicts.Request()
         res: DetectConflicts.Response = self.srv_detect_conflicts.call(req)
-        self.conflicts = res.conflicts
         return res.conflicts
 
     def lookup_robot_pose(self) -> PoseStamped | None:

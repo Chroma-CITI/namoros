@@ -39,7 +39,7 @@
         <parameters
            use_social_cost="false"
            robot_rotation_unit_angle="15.0"
-           manip_search_bound_percentage="0.2"
+           manip_search_bound_percentage="0.05"
            push_only="false"
            drive_type="differential" />
       </behavior>
@@ -53,7 +53,7 @@
         <parameters
            use_social_cost="true"
            robot_rotation_unit_angle="15.0"
-           manip_search_bound_percentage="0.2"
+           manip_search_bound_percentage="0.05"
            push_only="false"
            drive_type="differential" />
       </behavior>
@@ -70,14 +70,14 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="2490"
-     inkscape:window-height="1376"
+     inkscape:window-width="1850"
+     inkscape:window-height="1136"
      id="namedview37"
      showgrid="false"
-     inkscape:zoom="0.056568544"
-     inkscape:cx="19737.118"
-     inkscape:cy="16608.17"
-     inkscape:current-layer="movables_layer"
+     inkscape:zoom="0.014142136"
+     inkscape:cx="21531.401"
+     inkscape:cy="17076.628"
+     inkscape:current-layer="map_layer"
      fit-margin-top="0"
      fit-margin-left="0"
      fit-margin-right="0"
@@ -207,8 +207,8 @@
        sodipodi:nodetypes="ccccc"
        inkscape:label="#path3336-6-3" />
     <path
-       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:10.8574px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
-       d="M 1130,30 H 729.99994 V 280 H 1130 Z"
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:7.67734px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
+       d="M 1130,30 H 930 v 250 h 200 z"
        id="wall_2-3"
        type="wall"
        inkscape:connector-curvature="0"

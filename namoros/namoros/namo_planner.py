@@ -24,7 +24,7 @@ import namosim.svg_styles as svg_styles
 import namoros.utils as utils
 from namoros.utils import Pose2D
 from shapely.geometry import Point
-from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
+from rclpy.callback_groups import ReentrantCallbackGroup
 from namoros_msgs.msg import NamoPlan, NamoPath
 from namoros_msgs.msg import NamoPath, NamoPlan, NamoAction
 from namosim.navigation.basic_actions import (
@@ -163,7 +163,7 @@ class NamoPlanner:
         self.ros_publisher = RosPublisher(
             ros_node=ros_node,
             agent_ids=[self.agent.uid],
-            callback_group=MutuallyExclusiveCallbackGroup(),
+            callback_group=ReentrantCallbackGroup(),
         )
         self.step_count = 0
         self.logger = logger
@@ -276,7 +276,7 @@ class NamoPlanner:
                 grab_start_distance=self.agent.grab_start_distance,
                 rp=None,
                 check_horizon=self.agent.conflict_horizon,
-                exit_early_for_any_conflict=True,
+                exit_early_for_any_conflict=False,
                 apply_strict_horizon=False,
             )
         return set()
@@ -293,35 +293,54 @@ class NamoPlanner:
     def synchronize_state(
         self, other_robots: t.List[NamoEntity], obstacles: t.List[NamoEntity]
     ):
-        self.step_count += 1
+        try:
+            self.step_count += 1
 
-        for robot in other_robots:
-            if robot.entity_id in self.world.agents:
-                agent = self.world.agents[robot.entity_id]
-                pose = Pose2D(robot.pose.x, robot.pose.y, robot.pose.angle_degrees)
-                self.reset_robot_pose(agent, pose)
-            else:
-                # TODO
-                pass
+            held_obstacle = self.world.get_agent_held_obstacle(self.agent.uid)
 
-        held_obstacle = self.world.get_agent_held_obstacle(self.agent.uid)
-        for obstacle in obstacles:
-            if held_obstacle and held_obstacle.uid == obstacle.entity_id:
-                # Do not update pose of the obstacle the robot is currently manipulating
-                continue
-            existing_obstacles = self.world.get_movable_obstacles()
-            if obstacle.entity_id in existing_obstacles:
-                obs = existing_obstacles[obstacle.entity_id]
-                pose = Pose2D(
-                    obstacle.pose.x, obstacle.pose.y, obstacle.pose.angle_degrees
-                )
-                self.reset_obstacle_pose(obs, pose)
-            else:
-                # TODO
-                pass
+            for robot in other_robots:
+                if robot.entity_id in self.world.agents:
+                    agent = self.world.agents[robot.entity_id]
+                    pose = Pose2D(robot.pose.x, robot.pose.y, robot.pose.angle_degrees)
+                    self.reset_robot_pose(agent, pose)
 
-        self.agent.sense(self.world, ActionSuccess(), self.step_count)
-        self.publish_world()
+                    # if robot.holding_other_entity_id != "":
+                    #     robot_held_obstacle = self.world.get_movable_obstacles()[
+                    #         robot.holding_other_entity_id
+                    #     ]
+                    #     if (
+                    #         held_obstacle
+                    #         and robot_held_obstacle.uid == held_obstacle.uid
+                    #     ):
+                    #         continue
+
+                    #     self.world.entity_to_agent[robot_held_obstacle.uid] = (
+                    #         robot.entity_id
+                    #     )
+                else:
+                    # TODO
+                    pass
+
+            for obstacle in obstacles:
+                if held_obstacle and held_obstacle.uid == obstacle.entity_id:
+                    # Do not update pose of the obstacle the robot is currently manipulating
+                    continue
+
+                existing_obstacles = self.world.get_movable_obstacles()
+                if obstacle.entity_id in existing_obstacles:
+                    obs = existing_obstacles[obstacle.entity_id]
+                    pose = Pose2D(
+                        obstacle.pose.x, obstacle.pose.y, obstacle.pose.angle_degrees
+                    )
+                    self.reset_obstacle_pose(obs, pose)
+                else:
+                    # TODO
+                    pass
+
+            self.agent.sense(self.world, ActionSuccess(), self.step_count)
+            self.publish_world()
+        except Exception as ex:
+            self.logger.error(f"Synchronize state failed with errro: {ex}")
 
     def end_postpone(self):
         # sense

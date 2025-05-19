@@ -11,6 +11,7 @@ class WorldStateTracker:
     def __init__(self):
         self.robots: t.Dict[str, NamoEntity] = {}
         self.obstacles: t.Dict[str, NamoEntity] = {}
+        self.robot_to_obstacle: t.Dict[str, str] = {}  # held obstacle
         self._ignored_obstacles: t.Set[str] = set()
 
     def update_robot(self, robot: NamoEntity):
@@ -34,7 +35,17 @@ class WorldStateTracker:
     def unignore_obstacle(self, obstacle_id: str):
         self._ignored_obstacles.remove(obstacle_id)
 
+    def unignore_all(self):
+        self._ignored_obstacles = set()
+
+    def grabbed_obstacle(self, robot_id: str, obstacle_id: str):
+        self.robot_to_obstacle[robot_id] = obstacle_id
+
+    def released_obstacle(self, robot_id: str, obstacle_id: str):
+        if robot_id in self.robot_to_obstacle:
+            del self.robot_to_obstacle[robot_id]
+
     def clear(self):
         self.robots = {}
         self.obstacles = {}
-        self._ignored_obstacles = {}
+        self._ignored_obstacles = set()

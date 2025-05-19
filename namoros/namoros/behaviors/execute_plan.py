@@ -20,6 +20,7 @@ from namoros.behaviors.pause import Pause
 from namoros.behaviors.play_sound import PlaySound
 from namoros.behaviors.redetect_obstacle import RedetectObstacle
 from namoros.behaviors.TriggerReplan import TriggerReplan
+from namoros.behaviors.UnignoreAllObstacleSync import UnignoreAllObstacleSync
 
 
 class ExecuteNamoPlan(py_trees.behaviour.Behaviour):
@@ -34,11 +35,17 @@ class ExecuteNamoPlan(py_trees.behaviour.Behaviour):
             memory=True,
             children=[
                 DetectConflictsGuard(node=node),
-                Release(node=self.node),
-                TriggerReplan(node=node, update_plan=True),
+                Sequence(
+                    name="handle_conflict_seq",
+                    memory=True,
+                    children=[
+                        Release(node=self.node),
+                        UnignoreAllObstacleSync(node=self.node),
+                        TriggerReplan(node=node, update_plan=True),
+                    ],
+                ),
             ],
         )
-
         return handle_conflicts_root
 
     def create_postpone_tree(self, seconds: float) -> Behaviour:

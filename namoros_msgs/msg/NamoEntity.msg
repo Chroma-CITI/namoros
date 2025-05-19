@@ -1,3 +1,4 @@
 string entity_id
 geometry_msgs/Polygon polygon
 namoros_msgs/NamoPose pose
+string holding_other_entity_id

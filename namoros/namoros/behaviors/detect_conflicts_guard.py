@@ -9,14 +9,13 @@ class DetectConflictsGuard(py_trees.behaviour.Behaviour):
         self.node = node
 
     def initialise(self):
-        self.node.conflicts = []
         self.status = Status.RUNNING
 
     def update(self):
         conflicts = self.node.detect_conflicts()
         if len(conflicts) > 0:
             self.status = py_trees.common.Status.FAILURE
-            self.node.get_logger().info("Conflict detected")
+            self.node.get_logger().info("CONFLICT DETECTED")
         else:
             self.status = py_trees.common.Status.SUCCESS
         return self.status
