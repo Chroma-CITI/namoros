@@ -12,7 +12,7 @@ from namoros.behavior_node import NamoBehaviorNode
 
 class Release(py_trees.behaviour.Behaviour):
     def __init__(self, node: NamoBehaviorNode):
-        super().__init__(name="Grab")
+        super().__init__(name="Release")
         self.node = node
         self._status: Status = Status.INVALID
 
