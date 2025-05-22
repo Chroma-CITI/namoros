@@ -157,9 +157,9 @@ class ExecuteNamoPlan(py_trees.behaviour.Behaviour):
         if not self.node.plan:
             raise Exception("No plan")
         self.tree = self.create_sub_tree()
-        # py_trees.display.render_dot_tree(
-        #     self.tree.root, name="execute_plan_tree", target_directory="."
-        # )
+        py_trees.display.render_dot_tree(
+            self.tree.root, name="execute_plan_tree", target_directory="."
+        )
 
     def update(self):
         if not self.tree:

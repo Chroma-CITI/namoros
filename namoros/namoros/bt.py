@@ -112,7 +112,7 @@ def main(args=None):
     root = create_namo_tree(node=node)
     tree = BehaviourTree(root=root, unicode_tree_debug=False)
     tree.setup(node=node)
-    # py_trees.display.render_dot_tree(root, name="behavior_tree", target_directory=".")
+    py_trees.display.render_dot_tree(root, name="behavior_tree", target_directory=".")
     snapshot_visitor = py_trees.visitors.DebugVisitor()
 
     def post_tick_handler(tree: BehaviourTree):

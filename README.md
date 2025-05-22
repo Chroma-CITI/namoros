@@ -17,7 +17,7 @@ git clone https://gitlab.inria.fr/chroma/namo/namoros.git
 cd namosim
 ```
 
-Next, use `rosdep` to install the dependencies listed in the `package.xml` files: 
+Next, use `rosdep` to install the dependencies listed in the `package.xml` files:
 
 ```bash
 rosdep install --from-paths . -r -y
@@ -37,62 +37,37 @@ colcon build
 source install/setup.bash
 ```
 
-## Examples
+## Demostrations
 
-The best way is to open the repo in VSCode and use the python test explorer to run the `e2e` tests.
-
-Alternativley you can launch a test from the command line like so:
-```bash
-python3 -m pytest namosim/tests/e2e/e2e_test.py::TestE2E::test_social_dr_success_d
-```
-
-### Run a Basic Scenario and Visualize in RVIZ
-
-The following example runs the most basic scenario with the (Stillman,2005) algorithm and assumes you have `ROS2` and `RViz2` installed.
-
-Start rviz2:
+In order to launch a simulation demonstration a robot that makes use of namoros nodes, run the following script.
 
 ```bash
-rviz2 -d namosim/rviz/basic_view.rviz
+./namoros/launch_demo.sh
 ```
 
-Then, in a new terminal, run:
+## Architecture
 
-```bash
-python3 -m pytest namosim/tests/e2e/e2e_test.py::TestE2E::test_social_dr_success_d
-```
+### Main Behavior Tree
 
-## Run Unit Tests
+The simulated demo robot for namoros makes use of the following behavior tree. This tree ticks at a rate of 2Hz. 
 
-```bash
-./scripts/test_unit.sh
-```
-
-## Documentation
-
-You can find the docs site [here](https://chroma.gitlabpages.inria.fr/namo/namosim/).
-
-To build the docs site locally, run:
-
-```bash
-./scripts/make_docs.sh
-```
+![Main Behavior Tree](static/main_behavior_tree.svg)
 
 ## Authors
 
-* Benoit Renault
-* Jacques Saraydaryan
-* David Brown
-* Olivier Simonin
+- David Brown
+- Jacques Saraydaryan
+- Olivier Simonin
+- Benoit Renault
 
 ## Affiliated Teams and Organisations
 
-|          | Org/Team |
-|----------|----------------------------------------------------------------------------------------|
-| ![Inria Logo](docs/source/_static/inria.png)    | [Inria](https://inria.fr/fr)   |
-| ![INSA Lyon Logo](docs/source/_static/insa.png) | [INSA Lyon](https://www.insa-lyon.fr/)  |
+|                                                 | Org/Team                                      |
+| ----------------------------------------------- | --------------------------------------------- |
+| ![Inria Logo](docs/source/_static/inria.png)    | [Inria](https://inria.fr/fr)                  |
+| ![INSA Lyon Logo](docs/source/_static/insa.png) | [INSA Lyon](https://www.insa-lyon.fr/)        |
 | ![CITI Logo](docs/source/_static/citi.png)      | [CITI Laboratory](https://www.citi-lab.fr/)   |
-|  CHROMA                                         | [CHROMA Team](https://www.inria.fr/en/chroma)   |
+| CHROMA                                          | [CHROMA Team](https://www.inria.fr/en/chroma) |
 
 ## Cite Us
 
