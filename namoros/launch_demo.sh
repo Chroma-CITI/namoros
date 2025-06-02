@@ -9,7 +9,7 @@ colcon build
 source ./install/setup.bash 
 ros2 run namoros scenario2sdf --svg-file=${DIR}/config/namoros_demo_map.svg --out-dir=${DIR}/config
 colcon build
-ros2 launch namoros launch.multi.py \
+ros2 launch namoros launch.sim.py \
     scenario_file:=${DIR}/config/namoros_demo_map.svg \
     config_file:=${DIR}/config/namoros_config.yaml \
     sdf_file:=${DIR}/config/namo_world.sdf \

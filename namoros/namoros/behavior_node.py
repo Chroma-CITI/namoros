@@ -482,7 +482,7 @@ class NamoBehaviorNode(Node):
         req.path = path
         res: SimulatePath.Response = self.srv_simulate_path.call(req)
 
-    def synchronize_planner(self):
+    def synchronize_planner(self, current_action_index: int = -1):
         self.get_logger().info("Synchronizing planner state")
         robot_pose = self.lookup_robot_pose()
         if robot_pose is None:
@@ -504,6 +504,8 @@ class NamoBehaviorNode(Node):
         if self.omniscient_obstacle_perception:
             for obstacle in self.world_state_tracker.obstacles.values():
                 req.observed_obstacles.append(obstacle)
+
+        req.current_action_index = current_action_index
 
         self.srv_synchronize_planner.call(req)
 

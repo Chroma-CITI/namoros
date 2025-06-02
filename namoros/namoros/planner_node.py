@@ -157,7 +157,7 @@ class PlannerNode(Node):
             header = Header()
             header.stamp = self.get_clock().now().to_msg()
             header.frame_id = "map"
-            self.namo_planner.reset_robot_pose(self.namo_planner.agent, robot_pose)
+            self.namo_planner.reset_robot_pose(self.agent_id, robot_pose)
             self.namo_planner.reset_goal_pose(goal_pose)
             plan_result = self.namo_planner.compute_plan(header=header)
             if plan_result:
@@ -236,26 +236,36 @@ class PlannerNode(Node):
         if self.is_planning:
             return res
         if self.current_plan is not None:
-            poses = self.current_plan.get_all_robot_poses()
-            start_idx = self.current_plan.get_current_action_index()
-            poses = poses[start_idx : start_idx + 10]
-            robot_pose = Pose2D(
-                req.observed_robot_pose.x,
-                req.observed_robot_pose.y,
-                req.observed_robot_pose.angle_degrees,
-            )
-            min_dist = float("inf")
-            actions_ahead = 0
+            if req.current_action_index >= 0:
+                self.current_plan.set_current_action_index(req.current_action_index)
+                poses = self.current_plan.get_all_robot_poses()
+                pose = poses[req.current_action_index]
+                self.namo_planner.reset_robot_pose(
+                    self.agent_id, pose=Pose2D(pose[0], pose[1], pose[2])
+                )
+            else:
+                poses = self.current_plan.get_all_robot_poses()
+                start_idx = self.current_plan.get_current_action_index()
+                poses = poses[start_idx : start_idx + 10]
+                robot_pose = Pose2D(
+                    req.observed_robot_pose.x,
+                    req.observed_robot_pose.y,
+                    req.observed_robot_pose.angle_degrees,
+                )
+                min_dist = float("inf")
+                actions_ahead = 0
 
-            for i, pose in enumerate(poses):
-                d = utils.get_distance2d(Pose2D(pose[0], pose[1], pose[2]), robot_pose)
-                if d < min_dist:
-                    min_dist = d
-                    actions_ahead = i
+                for i, pose in enumerate(poses):
+                    d = utils.get_distance2d(
+                        Pose2D(pose[0], pose[1], pose[2]), robot_pose
+                    )
+                    if d < min_dist:
+                        min_dist = d
+                        actions_ahead = i
 
-            for i in range(actions_ahead):
-                action = self.current_plan.pop_next_action()
-                self.namo_planner.step_simulation({self.agent_id: action})
+                for i in range(actions_ahead):
+                    action = self.current_plan.pop_next_action()
+                    self.namo_planner.step_simulation({self.agent_id: action})
 
         self.namo_planner.synchronize_state(
             req.other_observed_robots, req.observed_obstacles

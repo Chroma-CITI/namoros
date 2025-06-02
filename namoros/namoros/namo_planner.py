@@ -177,7 +177,6 @@ class NamoPlanner:
             pose=pose,
             style=Style.from_string(svg_styles.DEFAULT_MOVABLE_ENTITY_STYLE),
             movability=Movability.MOVABLE,
-            full_geometry_acquired=True,
         )
         self.world.add_entity(movable)
         self.world.resolve_collisions(movable.uid)
@@ -193,7 +192,8 @@ class NamoPlanner:
         pose = self.world.agents[agent_id].pose
         return utils.Pose2D(x=pose[0], y=pose[1], degrees=pose[2])
 
-    def reset_robot_pose(self, agent: agents.Agent, pose: Pose2D):
+    def reset_robot_pose(self, agent_id: str, pose: Pose2D):
+        agent = self.world.agents[agent_id]
         agent.move_to_pose(pose)
         self.world.resolve_collisions(agent.uid)
         self.publish_world()
@@ -300,9 +300,8 @@ class NamoPlanner:
 
             for robot in other_robots:
                 if robot.entity_id in self.world.agents:
-                    agent = self.world.agents[robot.entity_id]
                     pose = Pose2D(robot.pose.x, robot.pose.y, robot.pose.angle_degrees)
-                    self.reset_robot_pose(agent, pose)
+                    self.reset_robot_pose(robot.entity_id, pose)
 
                     # if robot.holding_other_entity_id != "":
                     #     robot_held_obstacle = self.world.get_movable_obstacles()[

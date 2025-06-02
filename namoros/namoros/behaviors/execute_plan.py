@@ -3,6 +3,7 @@ import typing as t
 import py_trees
 from kobuki_ros_interfaces.msg import Sound
 from namoros.behaviors.IgnoreObstacleSync import IgnoreObstacleSync
+from namoros.behaviors.ManualSyncPlanner import ManualSyncPlanner
 from namoros.behaviors.backup import BackUp
 from namoros.behaviors.release import Release
 from namoros_msgs.msg._namo_path import NamoPath
@@ -59,7 +60,7 @@ class ExecuteNamoPlan(py_trees.behaviour.Behaviour):
         )
         return postpone_root
 
-    def create_grab_tree(self, path: NamoPath):
+    def create_grab_tree(self, path_start_action_idx: int, path: NamoPath):
         if not self.node.plan:
             raise Exception("No plan")
         if not path.is_transfer:
@@ -74,6 +75,9 @@ class ExecuteNamoPlan(py_trees.behaviour.Behaviour):
                 ClearGlobalCostmap(node=self.node),
                 ClearLocalCostmap(node=self.node),
                 FaceObstacle(node=self.node, obstacle_id=obstacle_id),
+                ManualSyncPlanner(
+                    node=self.node, current_action_index=path_start_action_idx
+                ),
                 # Grab(node=self.node, path=path),
                 Approach(node=self.node, obstacle_id=obstacle_id),
             ],
@@ -116,11 +120,13 @@ class ExecuteNamoPlan(py_trees.behaviour.Behaviour):
             return BehaviourTree(root)
 
         paths: t.List[NamoPath] = self.node.plan.paths  # type: ignore
+
+        path_start_action_idx = 0
         for namo_path in paths:
             nav_path = copy.deepcopy(namo_path.path)
             if namo_path.is_transfer:
                 assert namo_path.obstacle_id
-                grab = self.create_grab_tree(namo_path)
+                grab = self.create_grab_tree(path_start_action_idx, namo_path)
                 root.add_child(grab)
                 # remove the pre-grab and post-release poses since those are executed manually
                 nav_path.poses = nav_path.poses[1:-1]  # type: ignore
@@ -151,6 +157,8 @@ class ExecuteNamoPlan(py_trees.behaviour.Behaviour):
             if namo_path.is_transfer:
                 release = self.create_release_tree(path=namo_path)
                 root.add_child(release)
+
+            path_start_action_idx += len(namo_path.actions)
         return BehaviourTree(root)
 
     def initialise(self):

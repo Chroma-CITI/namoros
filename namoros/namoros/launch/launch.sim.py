@@ -65,7 +65,7 @@ def spawn_robots(context: t.Any, *args, **kwargs):  # type: ignore
                 "-Y",
                 str(agent.pose[2]),
             ],
-            output="screen",
+            output="log",
         )
         robots.append(robot_spawn)
 
@@ -74,14 +74,18 @@ def spawn_robots(context: t.Any, *args, **kwargs):  # type: ignore
             executable="robot_state_publisher",
             name="robot_state_publisher",
             namespace=f"/{agent.uid}",
-            output="screen",
+            output="log",
             parameters=[
                 {
                     "robot_description": robot_description.toxml(),  # type: ignore
                     "use_sim_time": True,
                 }
             ],
-            arguments=[],
+            arguments=[
+                "--ros-args",
+                "--log-level",
+                "error",
+            ],
             remappings=[
                 ("/robot_description", "robot_description"),
                 ("/joint_states", "joint_states"),
@@ -143,8 +147,14 @@ def spawn_robots(context: t.Any, *args, **kwargs):  # type: ignore
             executable="rviz2",
             namespace=f"/{agent.uid}",
             name=f"rviz2",
-            output="screen",
-            arguments=["-d", default_rviz_config_path],
+            output="log",
+            arguments=[
+                "-d",
+                default_rviz_config_path,
+                "--ros-args",
+                "--log-level",
+                "error",
+            ],
             parameters=[{"use_sim_time": True}],
             remappings=[
                 ("/tf", "tf"),
@@ -194,6 +204,7 @@ def spawn_robots(context: t.Any, *args, **kwargs):  # type: ignore
                 "params_file": os.path.join(pkg_share, "config/nav2_params.yaml"),
                 "map": LaunchConfiguration("map_yaml"),
                 "use_sim_time": "True",
+                "log_level": "error",
             }.items(),
         )
 
@@ -203,7 +214,12 @@ def spawn_robots(context: t.Any, *args, **kwargs):  # type: ignore
             executable="aruco_markers",
             name="aruco_markers",
             namespace=f"/{agent.uid}",
-            output="screen",
+            output="log",
+            arguments=[
+                "--ros-args",
+                "--log-level",
+                "error",
+            ],
             parameters=[
                 {
                     "marker_size": 0.1,
@@ -225,8 +241,14 @@ def spawn_robots(context: t.Any, *args, **kwargs):  # type: ignore
             executable="relay",
             name="scan_relay",
             namespace=f"/{agent.uid}",
-            arguments=[f"scan", f"local_costmap/scan"],
-            output="screen",
+            arguments=[
+                f"scan",
+                f"local_costmap/scan",
+                "--ros-args",
+                "--log-level",
+                "error",
+            ],
+            output="log",
         )
 
         robots += [
@@ -270,7 +292,7 @@ def spawn_obstacles(context: t.Any, *args, **kwargs):  # type: ignore
                 "-z",
                 "0.5",
             ],
-            output="screen",
+            output="log",
         )
         actions.append(obs_node)
 
@@ -286,7 +308,7 @@ def namo_planner_bringup(context: t.Any, *args, **kwargs):  # type: ignore
     ros_gz_bridge = Node(
         package="ros_gz_bridge",
         executable="parameter_bridge",
-        output="screen",
+        output="log",
         parameters=[{"use_sim_time": True, "config_file": bridge_config_path}],
     )
 
@@ -301,7 +323,7 @@ def namo_planner_bringup(context: t.Any, *args, **kwargs):  # type: ignore
             "4",
             LaunchConfiguration("sdf_file"),
         ],
-        output="screen",
+        output="log",
         additional_env={
             "GZ_SIM_SYSTEM_PLUGIN_PATH": plugin_path,
             "IGN_GAZEBO_RESOURCE_PATH": pkg_share,

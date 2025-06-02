@@ -108,7 +108,7 @@
     <sensor name="${sensor_name}" type="gpu_lidar">
       <pose relative_to="rplidar_link">0 0 0 0 0 0</pose>
       <gz_frame_id>rplidar_link</gz_frame_id>
-      <update_rate>30</update_rate>
+      <update_rate>15</update_rate>
       <visualize>${visualize}</visualize>
       <always_on>true</always_on>
       <lidar>
