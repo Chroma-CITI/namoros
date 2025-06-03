@@ -51,7 +51,7 @@ In order to launch a simulation demonstration a robot that makes use of namoros 
 
 The simulated demo robot for namoros makes use of the following behavior tree. This tree ticks at a rate of 2Hz. 
 
-![Main Behavior Tree](static/main_behavior_tree.svg)
+![Main Behavior Tree](static/namo_main_tree.svg)
 
 ## Authors
 
