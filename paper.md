@@ -55,23 +55,23 @@ The main behavior tree for the demo robot ticks at 2Hz and coordinates navigatio
 
 ### Main Behavior Tree
 
-![Main Behavior Tree](./static/namo_main_tree.svg)
+<img src="./static/namo_main_tree.svg" width="1000" alt="Main Behavior Tree">
 
 ### Execute Plan Subtree
 
-![Execute Plan BT](./static/execute_plan_tree.svg)
+<img src="./static/execute_plan_tree.svg" width="1000" alt="Execute Plan Tree">
 
 ### Transit Path Sequence
 
-![Transit Path BT](./static/transit_path_tree.svg)
+<img src="./static/transit_path_tree.svg" width="600" alt="Transit Path Tree">
 
 ### Grab Sequence
 
-![Grab BT](./static/grab_tree.svg)
+<img src="./static/grab_tree.svg" width="700" alt="Grab Tree">
 
 ### Release Sequence
 
-![Execute Plan BT](./static/release_tree.svg)
+<img src="./static/release_tree.svg" width="500" alt="Release Tree">
 
 ## Usage
 
