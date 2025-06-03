@@ -1,3 +1,4 @@
+import traceback
 import typing as t
 
 from namosim import agents
@@ -198,7 +199,8 @@ class NamoPlanner:
         self.world.resolve_collisions(agent.uid)
         self.publish_world()
 
-    def reset_obstacle_pose(self, obstacle: Obstacle, pose: Pose2D):
+    def reset_obstacle_pose(self, obstacle_id: str, pose: Pose2D):
+        obstacle = t.cast(Obstacle, self.world.dynamic_entities[obstacle_id])
         obstacle.move_to_pose(pose)
         self.world.resolve_collisions(obstacle.uid)
         self.publish_world()
@@ -303,19 +305,19 @@ class NamoPlanner:
                     pose = Pose2D(robot.pose.x, robot.pose.y, robot.pose.angle_degrees)
                     self.reset_robot_pose(robot.entity_id, pose)
 
-                    # if robot.holding_other_entity_id != "":
-                    #     robot_held_obstacle = self.world.get_movable_obstacles()[
-                    #         robot.holding_other_entity_id
-                    #     ]
-                    #     if (
-                    #         held_obstacle
-                    #         and robot_held_obstacle.uid == held_obstacle.uid
-                    #     ):
-                    #         continue
+                    if robot.holding_other_entity_id != "":
+                        robot_held_obstacle = self.world.get_movable_obstacles()[
+                            robot.holding_other_entity_id
+                        ]
+                        if (
+                            held_obstacle
+                            and robot_held_obstacle.uid == held_obstacle.uid
+                        ):
+                            continue
 
-                    #     self.world.entity_to_agent[robot_held_obstacle.uid] = (
-                    #         robot.entity_id
-                    #     )
+                        self.world.entity_to_agent[robot_held_obstacle.uid] = (
+                            robot.entity_id
+                        )
                 else:
                     # TODO
                     pass
@@ -331,15 +333,16 @@ class NamoPlanner:
                     pose = Pose2D(
                         obstacle.pose.x, obstacle.pose.y, obstacle.pose.angle_degrees
                     )
-                    self.reset_obstacle_pose(obs, pose)
+                    self.reset_obstacle_pose(obstacle.entity_id, pose)
                 else:
                     # TODO
                     pass
 
             self.agent.sense(self.world, ActionSuccess(), self.step_count)
             self.publish_world()
-        except Exception as ex:
-            self.logger.error(f"Synchronize state failed with errro: {ex}")
+        except Exception as e:
+            self.logger.error(f"An error occurred during synchronize state: {str(e)}")
+            self.logger.error(f"Traceback: {traceback.format_exc()}")
 
     def end_postpone(self):
         # sense

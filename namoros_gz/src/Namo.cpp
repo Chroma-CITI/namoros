@@ -83,7 +83,7 @@ Namo::Namo()
 
 void NamoPrivate::OnGrabCommand(const msgs::Param_V &_msg)
 {
-  // std::lock_guard<std::mutex> lock(this->mutex);
+  std::lock_guard<std::mutex> lock(this->mutex);
   ignmsg << "grab" << std::endl;
 
   auto params = _msg.param(0).params();
@@ -103,7 +103,7 @@ void NamoPrivate::OnGrabCommand(const msgs::Param_V &_msg)
 
 void NamoPrivate::OnReleaseCommand(const msgs::Param_V &_msg)
 {
-  // std::lock_guard<std::mutex> lock(this->mutex);
+  std::lock_guard<std::mutex> lock(this->mutex);
 
   ignmsg << "release" << std::endl;
 
@@ -148,6 +148,7 @@ void Namo::Configure(const gz::sim::Entity &_entity,
 void Namo::PreUpdate(const gz::sim::UpdateInfo &_info,
                      gz::sim::EntityComponentManager &_ecm)
 {
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   if (this->dataPtr.get()->grab != nullptr)
   {
     auto cmd = this->dataPtr.get()->grab.get();
@@ -225,6 +226,7 @@ void Namo::PreUpdate(const gz::sim::UpdateInfo &_info,
 void Namo::PostUpdate(const gz::sim::UpdateInfo &_info,
                       const gz::sim::EntityComponentManager &_ecm)
 {
+  std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   // This is a simple example of how to get information from UpdateInfo.
   std::string msg = "Hello, world! Simulation is ";
   if (!_info.paused)

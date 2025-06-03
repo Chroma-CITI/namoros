@@ -238,11 +238,21 @@ class PlannerNode(Node):
         if self.current_plan is not None:
             if req.current_action_index >= 0:
                 self.current_plan.set_current_action_index(req.current_action_index)
+                current_path = self.current_plan.get_current_path()
+
                 poses = self.current_plan.get_all_robot_poses()
                 pose = poses[req.current_action_index]
                 self.namo_planner.reset_robot_pose(
                     self.agent_id, pose=Pose2D(pose[0], pose[1], pose[2])
                 )
+
+                if current_path.is_transfer:
+                    obstacle_pose = current_path.obstacle_path.poses[
+                        current_path.action_index
+                    ]
+                    self.namo_planner.reset_obstacle_pose(
+                        current_path.obstacle_uid, obstacle_pose
+                    )
             else:
                 poses = self.current_plan.get_all_robot_poses()
                 start_idx = self.current_plan.get_current_action_index()

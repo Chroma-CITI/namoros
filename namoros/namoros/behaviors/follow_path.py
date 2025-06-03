@@ -64,12 +64,13 @@ class FollowPath(py_trees.behaviour.Behaviour):
         self.smooth_and_follow_path(self.namo_path.path)
 
     def update(self):
+        path_type = "transfer" if self.namo_path.is_transfer else "transit"
         if self._status == Status.RUNNING:
             self.node.get_logger().info(
-                "Following path." if not self.is_evasion else "Evading."
+                "Following {path_type} path." if not self.is_evasion else "Evading."
             )
         self.status = self._status
         self.node.publish_status_marker(
-            "FOLLOWING PATH" if not self.is_evasion else "EVADING"
+            f"FOLLOWING {path_type.upper()} PATH" if not self.is_evasion else "EVADING"
         )
         return self.status

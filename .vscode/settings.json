@@ -8,5 +8,8 @@
     "editor.codeActionsOnSave": {
       // "source.unusedImports": "always" 
     }
+  },
+  "files.associations": {
+    "ostream": "cpp"
   }
 }
