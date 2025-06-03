@@ -71,7 +71,7 @@ The main behavior tree for the demo robot ticks at 2Hz and coordinates navigatio
 
 ### Release Sequence
 
-![Release Sequence\label{fig:release}](./static/release_tree.svg){width="500px" align="center"}
+![Release Sequence\label{fig:release}](./static/release_tree.svg){width="500px" style="display: block; margin: 0 auto"}
 
 ## Usage
 
