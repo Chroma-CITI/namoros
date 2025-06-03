@@ -9,7 +9,7 @@ class UpdatePlanGuard(py_trees.behaviour.Behaviour):
         self.node = node
 
     def update(self):
-        if self.node.update_plan_flag:
-            self.node.update_plan_flag = False
+        if self.node.state.is_update_plan_triggered():
+            self.node.state.clear_update_plan_trigger()
             return py_trees.common.Status.FAILURE
         return py_trees.common.Status.SUCCESS

@@ -1,3 +1,4 @@
+import copy
 import functools
 import math
 import random
@@ -62,6 +63,79 @@ from std_msgs.msg import Header
 from visualization_msgs.msg import Marker
 from namosim.agents.stilman_2005_agent import Stilman2005Agent
 from namoros_msgs.action import ComputePlan
+from rclpy.clock import Clock
+
+
+class NamoState:
+    def __init__(self, agent: Stilman2005Agent, node: "NamoBehaviorNode", clock: Clock):
+        self.agent = agent
+        self.node = node
+        self.clock = clock
+        self.replan_count: int = 0
+        self.publish_init_pose_count = 0
+        self.reset()
+
+    def reset(self):
+        self._replan_flag: bool = False
+        self._update_plan_flag: bool = False
+        self.goal_pose: PoseStamped | None = None
+        self.bumper_pressed: bool = False
+        self.movable_obstacle_tracker = MovableObstacleTracker(self.node)
+        self.forward_dist_to_obstacle: float = float("inf")
+        self.plan: NamoPlan | None = None
+        self.world_state_tracker = WorldStateTracker()
+        self.ignored_obstacles: t.Set[str] = set()
+        self.init_goals()
+
+    def init_goals(self):
+        goal = self.agent.get_current_or_next_goal()
+        if goal:
+            header = Header()
+            header.frame_id = "map"
+            header.stamp = self.clock.now().to_msg()
+            self.goal_pose = utils.construct_ros_pose(
+                x=goal.pose[0], y=goal.pose[1], z=0.0, theta=goal.pose[2], header=header
+            )
+
+    def ignore_obstacle(self, obstacle_id: str):
+        self.ignored_obstacles.add(obstacle_id)
+
+    def unignore_obstacle(self, obstacle_id: str):
+        if obstacle_id in self.ignored_obstacles:
+            self.ignored_obstacles.remove(obstacle_id)
+
+    def unignore_all(self):
+        self.ignored_obstacles.clear()
+
+    def get_obstacle_pose(self, obstacle_id: str) -> Pose | None:
+        if obstacle_id not in self.world_state_tracker.obstacles:
+            return None
+        pose = self.world_state_tracker.obstacles[obstacle_id]
+        return pose
+
+    def trigger_a_replan(self):
+        self.replan_count += 1
+        self._replan_flag = True
+        self._update_plan_flag = False
+        self.world_state_tracker.clear()
+
+    def is_replan_triggered(self) -> bool:
+        return self._replan_flag
+
+    def clear_replan_trigger(self):
+        self._replan_flag = False
+
+    def trigger_update_plan(self):
+        # update plan is like replan but does reset the world state tracker
+        self.replan_count += 1
+        self._replan_flag = False
+        self._update_plan_flag = True
+
+    def is_update_plan_triggered(self) -> bool:
+        return self._update_plan_flag
+
+    def clear_update_plan_trigger(self):
+        self._update_plan_flag = False
 
 
 class NamoBehaviorNode(Node):
@@ -209,15 +283,16 @@ class NamoBehaviorNode(Node):
         self.tf_buffer = Buffer(cache_time=rclpy.time.Duration(seconds=20))
         self.tf_listener = TransformListener(self.tf_buffer, self)
 
-        # state
-        self.replan_count: int = 0
-        self.reset()
+        # publish initial pose
         self.get_logger().info(f"Namespace: {self.get_namespace()}")
         self.publish_initial_pose_timer = self.create_timer(
             5.0, self.publish_initial_pose
         )
         self.publish_init_pose_count = 0
-        self.init_goals()
+
+        # initialize state
+        self.state = NamoState(agent=self.agent, node=self, clock=self.get_clock())
+        self.goal_handle: ClientGoalHandle | None = None
 
     def publish_initial_pose(self):
         msg = PoseWithCovarianceStamped()
@@ -258,48 +333,22 @@ class NamoBehaviorNode(Node):
             self.publish_initial_pose_timer.cancel()
 
     def reset(self):
-        self.replan_flag: bool = False
-        self.update_plan_flag: bool = False
-        self.goal_pose: PoseStamped | None = None
-        self.grabbed = False
-        self.bumper_pressed: bool = False
-        self.goal_handle: ClientGoalHandle | None = None
-        self.movable_obstacle_tracker = MovableObstacleTracker(self)  # type: ignore
-        self.forward_dist_to_obstacle: float = float("inf")
-        self.obstacle_poses: t.Dict[str, Pose] = {}
-        self.plan: NamoPlan | None = None
-        self.world_state_tracker = WorldStateTracker()
-
-    def init_goals(self):
-        goal = self.agent.get_current_or_next_goal()
-        if goal:
-            header = Header()
-            header.frame_id = "map"
-            header.stamp = self.get_clock().now().to_msg()
-            self.goal_pose = utils.construct_ros_pose(
-                x=goal.pose[0], y=goal.pose[1], z=0.0, theta=goal.pose[2], header=header
-            )
+        self.state.reset()
 
     def create_obstacle_pose_callback(self, obstacle_name: str):
         def cb(msg: PoseArray):
-            self.obstacle_poses[obstacle_name] = msg.poses[0]  # type: ignore
-            pose2d = utils.entity_pose_to_pose2d(msg.poses[0])  # type: ignore
-            self.world_state_tracker.update_obstacle(obstacle_name, pose2d)
+            pose = msg.poses[0]  # type: ignore
+            self.state.world_state_tracker.update_obstacle(obstacle_name, pose)
 
         return cb
 
     def trigger_a_replan(self):
         self.get_logger().info("Triggering a replan.")
-        self.replan_flag = True
-        self.update_plan_flag = False
-        self.replan_count += 1
-        self.world_state_tracker.clear()
+        self.state.trigger_a_replan()
 
     def trigger_update_plan(self):
         self.get_logger().info("Triggering a plan update.")
-        self.replan_flag = False
-        self.update_plan_flag = True
-        self.replan_count += 1
+        self.state.trigger_update_plan()
 
     def laser_scan_callback(self, data: LaserScan):
         total_len = len(data.ranges)
@@ -319,7 +368,7 @@ class NamoBehaviorNode(Node):
     def _robot_info_callback(self, entity: NamoEntity):
         if entity.entity_id == self.agent_id:
             return
-        self.world_state_tracker.update_robot(entity)
+        self.state.world_state_tracker.update_robot(entity)
 
     def _namo_grab_callback(self, msg: ParamVec):
         robot_name: str | None = None
@@ -332,7 +381,7 @@ class NamoBehaviorNode(Node):
                 obstacle_name = param.value.string_value
 
         if robot_name and robot_name != self.agent_id and obstacle_name is not None:
-            self.world_state_tracker.grabbed_obstacle(
+            self.state.world_state_tracker.grabbed_obstacle(
                 robot_id=robot_name, obstacle_id=obstacle_name
             )
 
@@ -347,7 +396,7 @@ class NamoBehaviorNode(Node):
                 obstacle_name = param.value.string_value
 
         if robot_name and robot_name != self.agent_id and obstacle_name is not None:
-            self.world_state_tracker.released_obstacle(
+            self.state.world_state_tracker.released_obstacle(
                 robot_id=robot_name, obstacle_id=obstacle_name
             )
 
@@ -435,7 +484,7 @@ class NamoBehaviorNode(Node):
         return final_result_future
 
     def compose_compute_plan_goal_msg(self) -> ComputePlan.Goal:
-        if not self.goal_pose:
+        if not self.state.goal_pose:
             raise Exception("No goal pose")
         try:
             robot_tf = self.tf_buffer.lookup_transform(
@@ -450,17 +499,11 @@ class NamoBehaviorNode(Node):
 
         goal = ComputePlan.Goal()
         goal.start_pose = robot_pose
-        goal.goal_pose = self.goal_pose
+        goal.goal_pose = self.state.goal_pose
         self.get_logger().info(
-            f"{self.agent_id} computing plan to goal {self.goal_pose}"
+            f"{self.agent_id} computing plan to goal {self.state.goal_pose}"
         )
         return goal
-
-    def get_entity_polygon(self, uid: str):
-        req = GetEntityPolygon.Request()
-        req.entity_id = uid
-        res: GetEntityPolygon.Response = self.srv_compute_plan.call(req)
-        return utils.ros_polygon_to_shapely_polygon(res.polygon)
 
     def add_or_update_movable_ostable(
         self, uid: str, pose: Pose2D, polygon: geom.Polygon
@@ -490,22 +533,36 @@ class NamoBehaviorNode(Node):
             return
         robot_pose = utils.entity_pose_to_pose2d(robot_pose.pose)
         req = SynchronizeState.Request()
+        req.current_action_index = current_action_index
         req.observed_robot_pose.x = robot_pose.x
         req.observed_robot_pose.y = robot_pose.y
         req.observed_robot_pose.angle_degrees = robot_pose.degrees
 
-        for other_robot in self.world_state_tracker.robots.values():
-            if other_robot.entity_id in self.world_state_tracker.robot_to_obstacle:
+        other_robots: t.List[NamoEntity] = []
+        for other_robot in self.state.world_state_tracker.robots.values():
+            if (
+                other_robot.entity_id
+                in self.state.world_state_tracker.robot_to_obstacle
+            ):
                 other_robot.holding_other_entity_id = (
-                    self.world_state_tracker.robot_to_obstacle[other_robot.entity_id]
+                    self.state.world_state_tracker.robot_to_obstacle[
+                        other_robot.entity_id
+                    ]
                 )
-            req.other_observed_robots.append(other_robot)
+            other_robots.append(other_robot)
+        req.other_observed_robots = other_robots
 
+        observed_obstacles: t.List[NamoEntity] = []
         if self.omniscient_obstacle_perception:
-            for obstacle in self.world_state_tracker.obstacles.values():
-                req.observed_obstacles.append(obstacle)
-
-        req.current_action_index = current_action_index
+            for obs_id, obs_pose in self.state.world_state_tracker.obstacles.items():
+                pose2d = utils.entity_pose_to_pose2d(obs_pose)
+                obs_msg = NamoEntity()
+                obs_msg.entity_id = obs_id
+                obs_msg.pose.x = pose2d.x
+                obs_msg.pose.y = pose2d.y
+                obs_msg.pose.angle_degrees = pose2d.degrees
+                observed_obstacles.append(obs_msg)
+        req.observed_obstacles = observed_obstacles
 
         self.srv_synchronize_planner.call(req)
 
@@ -532,9 +589,12 @@ class NamoBehaviorNode(Node):
         robot_pose = self.lookup_robot_pose()
         if robot_pose is None:
             raise Exception("Failed to get robot pose")
-        return geom.Point(
-            robot_pose.pose.position.x, robot_pose.pose.position.y
-        ).buffer(self.robot_radius)
+        return t.cast(
+            geom.Polygon,
+            geom.Point(robot_pose.pose.position.x, robot_pose.pose.position.y).buffer(
+                self.robot_radius
+            ),
+        )
 
     def lookup_pose(self, frame_id: str) -> PoseStamped | None:
         try:
@@ -550,9 +610,9 @@ class NamoBehaviorNode(Node):
         return pose
 
     def goal_pose_callback(self, msg: PoseStamped):
-        self.goal_pose = msg  # entity_pose_to_pose2d(msg.pose)
+        self.state.goal_pose = msg  # entity_pose_to_pose2d(msg.pose)
         self.get_logger().info(
-            f"Received goal pose: {self.goal_pose}, frame: {msg.header.frame_id}"
+            f"Received goal pose: {self.state.goal_pose}, frame: {msg.header.frame_id}"
         )
 
     def wait_for_successful_task_completion(self):
@@ -569,7 +629,6 @@ class NamoBehaviorNode(Node):
         return None
 
     def grab(self, obs_marker_id: str):
-        self.grabbed = True
         self.get_logger().info(f"Grabbing obstacle {obs_marker_id}.")
         obstacle_name = self.obstacle_marker_id_to_name(obs_marker_id)
         if obstacle_name is None:
@@ -597,7 +656,6 @@ class NamoBehaviorNode(Node):
         self.update_robot_footprint_for_grab(obs_marker_id=obs_marker_id)
 
     def release(self):
-        self.grabbed = False
         self.get_logger().info(f"Release.")
         if self.is_sim:
             params = ParamVec()
@@ -613,10 +671,11 @@ class NamoBehaviorNode(Node):
         for pose in msg.poses:
             self.get_logger().info(str(pose))
 
-    def set_obstacle_pose(self, obstacle_name: str) -> Pose | None:
-        if obstacle_name not in self.obstacle_poses:
+    def set_obstacle_pose(self, obstacle_name: str):
+        box_pose = self.state.get_obstacle_pose(obstacle_name)
+        if box_pose is None:
             return
-        new_box_pose = self.obstacle_poses[obstacle_name]
+        new_box_pose = copy.deepcopy(box_pose)
         new_box_pose.position.z += 0.4
 
         # Define the shell command
@@ -627,7 +686,6 @@ class NamoBehaviorNode(Node):
         self.get_logger().info(f"set obstacle pose command: {shell_command}")
         # Execute the shell command synchronously
         subprocess.run(shell_command, shell=True)
-        return new_box_pose
 
     def follow_path(self, path: Path, controller_id: str):
         """Returns a future that should resolve to a FollowPath.Result object"""
@@ -738,7 +796,7 @@ class NamoBehaviorNode(Node):
             # TODO
             return
 
-        obstacle_polygon = self.movable_obstacle_tracker.get_obstacle_polygon(
+        obstacle_polygon = self.state.movable_obstacle_tracker.get_obstacle_polygon(
             obs_marker_id
         )
         if obstacle_polygon is None:

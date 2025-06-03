@@ -9,22 +9,22 @@ from rclpy.executors import MultiThreadedExecutor
 
 from namoros.behavior_node import NamoBehaviorNode
 from namoros.behaviors.ComputePlan import ComputePlan
-from namoros.behaviors.clear_new_movables import ClearNewMovables
-from namoros.behaviors.execute_plan import ExecuteNamoPlan
-from namoros.behaviors.interrupt_robot import InterruptRobot
-from namoros.behaviors.new_obstacle_detected import NewObstacleGuard
-from namoros.behaviors.play_sound import PlaySound
-from namoros.behaviors.release import Release
-from namoros.behaviors.replan_guard import ReplanGuard
-from namoros.behaviors.synchronize_planner import SynchronizePlanner
-from namoros.behaviors.update_plan_guard import UpdatePlanGuard
+from namoros.behaviors.ClearNewMovables import ClearNewMovables
+from namoros.behaviors.ExecutePlan import ExecutePlan
+from namoros.behaviors.InterruptRobot import InterruptRobot
+from namoros.behaviors.NewObstacleGuard import NewObstacleGuard
+from namoros.behaviors.PlaySound import PlaySound
+from namoros.behaviors.Release import Release
+from namoros.behaviors.ReplanGuard import ReplanGuard
+from namoros.behaviors.SynchronizePlannerPeriodic import SynchronizePlannerPeriodic
+from namoros.behaviors.UpdatePlanGuard import UpdatePlanGuard
 from namoros.behaviors.UpdatePlan import UpdatePlan
 
-from namoros.behaviors.wait_for_full_obstacle_detection import (
+from namoros.behaviors.WaitForFullObstacleDetection import (
     WaitForFullObstacleDetection,
 )
-from namoros.behaviors.wait_for_goal_pose import WaitForGoalPose
-from namoros.behaviors.wait_for_init_pose import WaitForInitPose
+from namoros.behaviors.WaitForGoalPose import WaitForGoalPose
+from namoros.behaviors.WaitForInitPose import WaitForInitPose
 
 
 def create_namo_tree(node: NamoBehaviorNode) -> Behaviour:
@@ -60,7 +60,7 @@ def create_namo_tree(node: NamoBehaviorNode) -> Behaviour:
         children=[
             update_plan_guard,
             PlaySound(node=node, sound=Sound.CLEANINGSTART),
-            ExecuteNamoPlan(node=node),
+            ExecutePlan(node=node),
             PlaySound(node=node, sound=Sound.CLEANINGEND),
         ],
     )
@@ -98,7 +98,7 @@ def create_namo_tree(node: NamoBehaviorNode) -> Behaviour:
     root = Parallel(
         name="root_parallel",
         policy=ParallelPolicy.SuccessOnOne(),
-        children=[SynchronizePlanner(node=node), root],
+        children=[SynchronizePlannerPeriodic(node=node), root],
     )
     return root
 

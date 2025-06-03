@@ -10,6 +10,6 @@ class ClearNewMovables(py_trees.behaviour.Behaviour):
         self.node = node
 
     def update(self):
-        self.node.movable_obstacle_tracker.newly_detected_obstacle_ids.popleft()
+        self.node.state.movable_obstacle_tracker.newly_detected_obstacle_ids.popleft()
         self.status = Status.SUCCESS
         return self.status

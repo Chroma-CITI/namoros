@@ -3,16 +3,15 @@ import py_trees
 from namoros.behavior_node import NamoBehaviorNode
 
 
-class ReplanGuard(py_trees.behaviour.Behaviour):
+class WaitForGoalPose(py_trees.behaviour.Behaviour):
     def __init__(self, node: NamoBehaviorNode):
-        super().__init__(name="ReplanGuard")
+        super().__init__(name="wait_for_goal_pose")
         self.node = node
 
     def update(self):
-        if self.node.replan_flag:
+        if self.node.state.goal_pose is None:
             self.status = py_trees.common.Status.RUNNING
-            self.node.get_logger().info("REPLANNING...")
-            self.node.replan_flag = False
+            self.node.get_logger().info("Waiting for goal pose")
         else:
             self.status = py_trees.common.Status.SUCCESS
         return self.status

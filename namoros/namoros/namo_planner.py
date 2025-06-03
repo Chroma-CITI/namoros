@@ -233,12 +233,13 @@ class NamoPlanner:
         # think
         think_result = self.agent.think(ros_publisher=self.ros_publisher)
         plan = think_result.plan
-
-        if plan is None:
-            plan.reset()
-            self.ros_publisher.publish_robot_plan(plan, self.agent, map=self.world.map)
-            self.logger.info("Computed namo plan")
+        if not plan:
+            self.logger.info("Failed to compute plan")
             return None
+
+        plan.reset()
+        self.ros_publisher.publish_robot_plan(plan, self.agent, map=self.world.map)
+        self.logger.info("Computed namo plan")
 
         plan_msg = plan_to_msg(plan, header)
 

@@ -4,29 +4,29 @@ import py_trees
 from kobuki_ros_interfaces.msg import Sound
 from namoros.behaviors.IgnoreObstacleSync import IgnoreObstacleSync
 from namoros.behaviors.ManualSyncPlanner import ManualSyncPlanner
-from namoros.behaviors.backup import BackUp
-from namoros.behaviors.release import Release
+from namoros.behaviors.Backup import BackUp
+from namoros.behaviors.Release import Release
 from namoros_msgs.msg._namo_path import NamoPath
 from py_trees.behaviour import Behaviour
 from py_trees.composites import Selector, Sequence
 from py_trees.trees import BehaviourTree
 from namoros.behavior_node import NamoBehaviorNode
-from namoros.behaviors.approach import Approach
-from namoros.behaviors.clear_global_costmap import ClearGlobalCostmap
-from namoros.behaviors.clear_local_costmap import ClearLocalCostmap
-from namoros.behaviors.detect_conflicts_guard import DetectConflictsGuard
-from namoros.behaviors.face_obstacle import FaceObstacle
-from namoros.behaviors.follow_path import FollowPath
-from namoros.behaviors.pause import Pause
-from namoros.behaviors.play_sound import PlaySound
-from namoros.behaviors.redetect_obstacle import RedetectObstacle
+from namoros.behaviors.Approach import Approach
+from namoros.behaviors.ClearGlobalCostmap import ClearGlobalCostmap
+from namoros.behaviors.ClearLocalCostmap import ClearLocalCostmap
+from namoros.behaviors.DetectConflictsGuard import DetectConflictsGuard
+from namoros.behaviors.FaceObstacle import FaceObstacle
+from namoros.behaviors.FollowPath import FollowPath
+from namoros.behaviors.Pause import Pause
+from namoros.behaviors.PlaySound import PlaySound
+from namoros.behaviors.RedetectObstacle import RedetectObstacle
 from namoros.behaviors.TriggerReplan import TriggerReplan
 from namoros.behaviors.UnignoreAllObstacleSync import UnignoreAllObstacleSync
 
 
-class ExecuteNamoPlan(py_trees.behaviour.Behaviour):
+class ExecutePlan(py_trees.behaviour.Behaviour):
     def __init__(self, node: NamoBehaviorNode):
-        super().__init__(name="execute_namo_plan")
+        super().__init__(name="ExecutePlan")
         self.node = node
         self.tree: BehaviourTree | None = None
 
@@ -61,7 +61,7 @@ class ExecuteNamoPlan(py_trees.behaviour.Behaviour):
         return postpone_root
 
     def create_grab_tree(self, path_start_action_idx: int, path: NamoPath):
-        if not self.node.plan:
+        if not self.node.state.plan:
             raise Exception("No plan")
         if not path.is_transfer:
             raise Exception("Not a transfer path")
@@ -85,7 +85,7 @@ class ExecuteNamoPlan(py_trees.behaviour.Behaviour):
         return root
 
     def create_release_tree(self, path: NamoPath):
-        if not self.node.plan:
+        if not self.node.state.plan:
             raise Exception("No plan")
         obstacle_id: str = path.obstacle_id  # type: ignore
 
@@ -108,18 +108,20 @@ class ExecuteNamoPlan(py_trees.behaviour.Behaviour):
         return root
 
     def create_sub_tree(self):
-        if not self.node.plan:
+        if not self.node.state.plan:
             raise Exception("No plan")
 
         root = py_trees.composites.Sequence(name="execute_plan", memory=True)
 
-        if self.node.plan.postpone_steps > 0:
+        if self.node.state.plan.postpone_steps > 0:
             root.add_child(
-                self.create_postpone_tree(seconds=self.node.plan.postpone_steps * 0.5)
+                self.create_postpone_tree(
+                    seconds=self.node.state.plan.postpone_steps * 0.5
+                )
             )
             return BehaviourTree(root)
 
-        paths: t.List[NamoPath] = self.node.plan.paths  # type: ignore
+        paths: t.List[NamoPath] = self.node.state.plan.paths  # type: ignore
 
         path_start_action_idx = 0
         for namo_path in paths:
@@ -162,7 +164,7 @@ class ExecuteNamoPlan(py_trees.behaviour.Behaviour):
         return BehaviourTree(root)
 
     def initialise(self):
-        if not self.node.plan:
+        if not self.node.state.plan:
             raise Exception("No plan")
         self.tree = self.create_sub_tree()
         py_trees.display.render_dot_tree(

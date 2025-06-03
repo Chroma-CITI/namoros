@@ -9,7 +9,10 @@ class NewObstacleGuard(py_trees.behaviour.Behaviour):
         self.node = node
 
     def update(self):
-        if len(self.node.movable_obstacle_tracker.newly_detected_obstacle_ids) > 0:
+        if (
+            len(self.node.state.movable_obstacle_tracker.newly_detected_obstacle_ids)
+            > 0
+        ):
             self.status = py_trees.common.Status.FAILURE
         else:
             self.status = py_trees.common.Status.SUCCESS

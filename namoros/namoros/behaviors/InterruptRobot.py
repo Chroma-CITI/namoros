@@ -21,7 +21,7 @@ class InterruptRobot(py_trees.behaviour.Behaviour):
 
     def initialise(self):
         self._status: Status = Status.INVALID
-        if not self.node.goal_pose:
+        if not self.node.state.goal_pose:
             raise Exception("No goal pose")
         self._status = Status.RUNNING
         future = self.node.cancel_nav_task()

@@ -47,14 +47,14 @@ class UpdatePlan(py_trees.behaviour.Behaviour):
                 self.node.get_logger().info("Failed to update the plan")
                 self.node.trigger_a_replan()
             else:
-                self.node.plan = result.plan
+                self.node.state.plan = result.plan
                 self._status = Status.SUCCESS
         except Exception as e:
             self.node.get_logger().error(f"An error occured while updating plan: {e}")
             self._status = Status.FAILURE
 
     def initialise(self):
-        if not self.node.goal_pose:
+        if not self.node.state.goal_pose:
             raise Exception("No goal pose")
         self._status = Status.RUNNING
         self._send_goal()

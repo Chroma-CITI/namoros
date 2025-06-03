@@ -13,9 +13,9 @@ class IgnoreObstacleSync(py_trees.behaviour.Behaviour):
 
     def initialise(self):
         if self.unignore:
-            self.node.state.unignore_obstacle(self.obstacle_id)
+            self.node.world_state_tracker.unignore_obstacle(self.obstacle_id)
         else:
-            self.node.state.ignore_obstacle(self.obstacle_id)
+            self.node.world_state_tracker.ignore_obstacle(self.obstacle_id)
 
     def update(self):
         return py_trees.common.Status.SUCCESS

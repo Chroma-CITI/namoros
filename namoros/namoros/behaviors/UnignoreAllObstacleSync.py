@@ -8,7 +8,7 @@ class UnignoreAllObstacleSync(py_trees.behaviour.Behaviour):
         self.node = node
 
     def initialise(self):
-        self.node.world_state_tracker.unignore_all()
+        self.node.state.unignore_all()
 
     def update(self):
         return py_trees.common.Status.SUCCESS

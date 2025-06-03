@@ -127,7 +127,7 @@ def run(
     for entity in w.dynamic_entities.values():
         x, y, theta = entity.pose
         if entity.type_ == "movable":
-            minx, miny, maxx, maxy = entity.polygon.minimum_rotated_rectangle.bounds
+            minx, miny, maxx, maxy = entity.polygon.minimum_rotated_rectangle.bounds  # type: ignore
             width = maxx - minx
             height = maxy - miny
             size = max(width, height)

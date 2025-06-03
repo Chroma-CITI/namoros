@@ -147,7 +147,7 @@ class MovableObstacleTracker:
         for obs in self.node.namoros_config.obstacles:
             if obs.marker_id == marker_id:
                 if obs.shape == ShapeEnum.circle:
-                    polygon = geom.Point(0, 0).buffer(obs.radius)
+                    polygon = t.cast(geom.Polygon, geom.Point(0, 0).buffer(obs.radius))
                     return polygon
                 elif obs.shape == ShapeEnum.rectangle:
                     polygon = geom.Polygon(

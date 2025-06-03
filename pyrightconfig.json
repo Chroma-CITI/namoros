@@ -6,17 +6,17 @@
     "DEBUG": true
   },
   "reportMissingImports": "error",
-  "reportMissingTypeStubs": false,
+  "reportMissingTypeStubs": "warning",
   "reportIncompatibleMethodOverride": false,
-  "reportAttributeAccessIssue": false,
+  "reportAttributeAccessIssue": "warning",
   "reportArgumentType": false,
-  "reportOptionalMemberAccess": false,
+  "reportOptionalMemberAccess": "warning",
   "pythonVersion": "3.10",
   "pythonPlatform": "Linux",
   "executionEnvironments": [
     {
       "root": "./namoros",
-      "extraPaths": ["./namosim"]
+      "extraPaths": ["./namosim/namosim"]
     }
   ]
 }

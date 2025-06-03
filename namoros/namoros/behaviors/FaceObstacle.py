@@ -30,8 +30,10 @@ class FaceObstacle(py_trees.behaviour.Behaviour):
 
     def initialise(self):
         self._status = Status.RUNNING
-        obstacle_pose = self.node.movable_obstacle_tracker.get_averaged_marker_pose(
-            marker_id=self.obstacle_id
+        obstacle_pose = (
+            self.node.state.movable_obstacle_tracker.get_averaged_marker_pose(
+                marker_id=self.obstacle_id
+            )
         )
         if obstacle_pose is None:
             self._status = Status.SUCCESS

@@ -15,7 +15,7 @@ class RedetectObstacle(py_trees.behaviour.Behaviour):
         self.max_seconds = max_seconds
 
     def initialise(self):
-        self.node.movable_obstacle_tracker.reset_obstacle(self.obtacle_id)
+        self.node.state.movable_obstacle_tracker.reset_obstacle(self.obtacle_id)
         self.start_time = time.time()
 
     def update(self):
@@ -28,18 +28,18 @@ class RedetectObstacle(py_trees.behaviour.Behaviour):
             )
             return self.status
 
-        if self.node.movable_obstacle_tracker.is_obstacle_fully_detected(
+        if self.node.state.movable_obstacle_tracker.is_obstacle_fully_detected(
             self.obtacle_id
         ):
             self.status = py_trees.common.Status.SUCCESS
             self.node.get_logger().info(
                 f"Successfully redetected obstacle {self.obtacle_id}"
             )
-            self.node.movable_obstacle_tracker.update_obstacle_polygons()
+            self.node.state.movable_obstacle_tracker.update_obstacle_polygons()
             self.node.trigger_a_replan()
         else:
             n = len(
-                self.node.movable_obstacle_tracker.detected_movables.get(
+                self.node.state.movable_obstacle_tracker.detected_movables.get(
                     self.obtacle_id, []
                 )
             )
