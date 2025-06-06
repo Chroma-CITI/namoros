@@ -13,7 +13,9 @@ class ManualSyncPlanner(py_trees.behaviour.Behaviour):
         self.action_index = action_index
 
     def update(self):
+        self.node.get_logger().info("Manual Sync")
         self.node.synchronize_planner(
             path_index=self.path_index, action_index=self.action_index
         )
+        self.node.get_logger().info("Finished manual Sync")
         return Status.SUCCESS

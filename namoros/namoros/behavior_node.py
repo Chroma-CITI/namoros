@@ -500,7 +500,7 @@ class NamoBehaviorNode(Node):
         )
         return goal
 
-    def add_or_update_movable_ostable(
+    def add_or_update_movable_obstable(
         self, uid: str, pose: Pose2D, polygon: geom.Polygon
     ):
         self.get_logger().info("Adding obstacle")
@@ -550,8 +550,8 @@ class NamoBehaviorNode(Node):
             other_robots.append(other_robot)
         req.other_observed_robots = other_robots
 
-        observed_obstacles: t.List[NamoEntity] = []
         if self.omniscient_obstacle_perception:
+            observed_obstacles: t.List[NamoEntity] = []
             for obs_id, obs_pose in self.state.world_state_tracker.obstacles.items():
                 if obs_id in self.state.ignored_obstacles:
                     continue
@@ -562,7 +562,7 @@ class NamoBehaviorNode(Node):
                 obs_msg.pose.y = pose2d.y
                 obs_msg.pose.angle_degrees = pose2d.degrees
                 observed_obstacles.append(obs_msg)
-        req.observed_obstacles = observed_obstacles
+            req.observed_obstacles = observed_obstacles
 
         self.srv_synchronize_planner.call(req)
 
@@ -656,6 +656,7 @@ class NamoBehaviorNode(Node):
         self.state.world_state_tracker.grab_obstacle(
             robot_id=self.agent_id, obstacle_id=obstacle_name
         )
+        self.get_logger().info(f"Grabbed obstacle {obs_marker_id}.")
 
     def release(self):
         self.get_logger().info(f"Release.")

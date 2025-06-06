@@ -193,16 +193,22 @@ class NamoPlanner:
         pose = self.world.agents[agent_id].pose
         return utils.Pose2D(x=pose[0], y=pose[1], degrees=pose[2])
 
-    def reset_robot_pose(self, agent_id: str, pose: Pose2D):
+    def reset_robot_pose(
+        self, agent_id: str, pose: Pose2D, resolve_collisions: bool = True
+    ):
         agent = self.world.agents[agent_id]
         agent.move_to_pose(pose)
-        self.world.resolve_collisions(agent.uid)
+        if resolve_collisions:
+            self.world.resolve_collisions(agent.uid)
         self.publish_world()
 
-    def reset_obstacle_pose(self, obstacle_id: str, pose: Pose2D):
+    def reset_obstacle_pose(
+        self, obstacle_id: str, pose: Pose2D, resolve_collisions: bool = True
+    ):
         obstacle = t.cast(Obstacle, self.world.dynamic_entities[obstacle_id])
         obstacle.move_to_pose(pose)
-        self.world.resolve_collisions(obstacle.uid)
+        if resolve_collisions:
+            self.world.resolve_collisions(obstacle.uid)
         self.publish_world()
 
     def reset_goal_pose(self, pose: Pose2D):

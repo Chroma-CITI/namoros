@@ -6,11 +6,11 @@ from namoros.behaviors.IgnoreObstacleSync import IgnoreObstacleSync
 from namoros.behaviors.ManualSyncPlanner import ManualSyncPlanner
 from namoros.behaviors.Backup import BackUp
 from namoros.behaviors.Release import Release
+from namoros.behaviors.SynchronizePlannerPeriodic import SynchronizePlannerPeriodic
 from namoros.behaviors.UnignoreObstacleSync import UnignoreObstacleSync
 from namoros_msgs.msg._namo_path import NamoPath
 from py_trees.behaviour import Behaviour
 from py_trees.composites import Selector, Sequence
-from py_trees.trees import BehaviourTree
 from namoros.behavior_node import NamoBehaviorNode
 from namoros.behaviors.Approach import Approach
 from namoros.behaviors.ClearGlobalCostmap import ClearGlobalCostmap
@@ -23,6 +23,7 @@ from namoros.behaviors.PlaySound import PlaySound
 from namoros.behaviors.RedetectObstacle import RedetectObstacle
 from namoros.behaviors.TriggerReplan import TriggerReplan
 from namoros.behaviors.UnignoreAllObstacles import UnignoreAllObstacles
+from py_trees_ros.trees import BehaviourTree
 
 
 class ExecutePlan(py_trees.behaviour.Behaviour):
@@ -77,11 +78,14 @@ class ExecutePlan(py_trees.behaviour.Behaviour):
                 ClearGlobalCostmap(node=self.node),
                 ClearLocalCostmap(node=self.node),
                 FaceObstacle(node=self.node, obstacle_id=obstacle_id),
-                ManualSyncPlanner(
-                    node=self.node, path_index=path_index, action_index=0
-                ),
+                # ManualSyncPlanner(
+                #     node=self.node, path_index=path_index, action_index=0
+                # ),
                 # Grab(node=self.node, path=path),
                 Approach(node=self.node, obstacle_id=obstacle_id),
+                ManualSyncPlanner(
+                    node=self.node, path_index=path_index, action_index=1
+                ),
             ],
         )
         return root
@@ -146,12 +150,18 @@ class ExecutePlan(py_trees.behaviour.Behaviour):
                 is_evasion=namo_path.is_evasion,
             )
 
+            follow_path_and_sync_planner = py_trees.composites.Parallel(
+                name="follow_path_and_sync_planner",
+                policy=py_trees.common.ParallelPolicy.SuccessOnOne(),
+                children=[follow_path, SynchronizePlannerPeriodic(node=self.node)],
+            )
+
             follow_path_seq = Sequence(
                 "follow_path_seq",
                 memory=False,
                 children=[
                     self.create_conflict_handling_subtree(self.node),
-                    follow_path,
+                    follow_path_and_sync_planner,
                 ],
             )
 
@@ -165,12 +175,14 @@ class ExecutePlan(py_trees.behaviour.Behaviour):
                 )
                 root.add_child(release)
 
-        return BehaviourTree(root)
+        return BehaviourTree(root, unicode_tree_debug=False)
 
     def initialise(self):
         if not self.node.state.plan:
             raise Exception("No plan")
         self.tree = self.create_sub_tree()
+        snapshot_visitor = py_trees.visitors.DebugVisitor()
+        self.tree.visitors.append(snapshot_visitor)
         py_trees.display.render_dot_tree(
             self.tree.root, name="execute_plan_tree", target_directory="."
         )

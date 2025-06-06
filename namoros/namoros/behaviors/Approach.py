@@ -20,19 +20,18 @@ class Approach(py_trees.behaviour.Behaviour):
             cmd_vel.linear.x = 0.05
             cmd_vel.angular.z = 0.0
             self.node.publish_cmd_vel(cmd_vel)
-            self.status = Status.RUNNING
             self.node.get_logger().info(
                 f"Advancing towards obstacle. Distance = {self.node.forward_dist_to_obstacle}"
             )
             self.node.publish_status_marker("APPROACHING OBSTACLE")
-        else:
-            # stop
-            cmd_vel = Twist()
-            cmd_vel.linear.x = 0.0
-            cmd_vel.angular.z = 0.0
-            self.node.publish_cmd_vel(cmd_vel)
-            self.status = Status.SUCCESS
-            self.node.get_logger().info("Finished advancing towards obstacle")
-            self.node.grab(obs_marker_id=self.obstacle_id)
-            self.node.publish_status_marker("GRABBING OBSTACLE")
-        return self.status
+            return Status.RUNNING
+
+        # stop
+        cmd_vel = Twist()
+        cmd_vel.linear.x = 0.0
+        cmd_vel.angular.z = 0.0
+        self.node.publish_cmd_vel(cmd_vel)
+        self.node.get_logger().info("Finished advancing towards obstacle")
+        self.node.grab(obs_marker_id=self.obstacle_id)
+        self.node.publish_status_marker("GRABBING OBSTACLE")
+        return Status.SUCCESS

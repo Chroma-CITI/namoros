@@ -99,17 +99,12 @@ def create_namo_tree(node: NamoBehaviorNode) -> Behaviour:
             new_movable_and_main,
         ],
     )
-    root = Parallel(
-        name="root_parallel",
-        policy=ParallelPolicy.SuccessOnOne(),
-        children=[SynchronizePlannerPeriodic(node=node), root],
-    )
     return root
 
 
 def main(args=None):
     rclpy.init(args=args)
-    py_trees.logging.level = py_trees.logging.Level.WARN
+    py_trees.logging.level = py_trees.logging.Level.INFO
     executor = MultiThreadedExecutor()
     node = NamoBehaviorNode()
     executor.add_node(node)

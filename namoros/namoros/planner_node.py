@@ -255,19 +255,26 @@ class PlannerNode(Node):
                     req.path_index, req.action_index
                 )
 
-                path = self.current_plan.paths[req.path_index]
+                path = self.current_plan.get_current_path()
                 robot_pose = path.robot_path.poses[req.action_index]
                 self.namo_planner.reset_robot_pose(
                     self.agent_id,
                     pose=Pose2D(robot_pose[0], robot_pose[1], robot_pose[2]),
+                    resolve_collisions=False,
                 )
 
                 observed_obstacles: t.List[NamoEntity] = []
                 if path.is_transfer:
                     assert isinstance(path, TransferPath)
+
+                    if path.action_index > 0:
+                        self.namo_planner.world.entity_to_agent[
+                            path.obstacle_uid
+                        ] = self.agent_id
+
                     obstacle_pose = path.obstacle_path.poses[path.action_index]
                     self.namo_planner.reset_obstacle_pose(
-                        path.obstacle_uid, obstacle_pose
+                        path.obstacle_uid, obstacle_pose, resolve_collisions=False
                     )
 
                     for obs in t.cast(t.List[NamoEntity], req.observed_obstacles):
@@ -304,9 +311,9 @@ class PlannerNode(Node):
                     action = self.current_plan.pop_next_action()
                     self.namo_planner.step_simulation({self.agent_id: action})
 
-                self.namo_planner.synchronize_state(
-                    req.other_observed_robots, req.observed_obstacles
-                )
+                # self.namo_planner.synchronize_state(
+                #     req.other_observed_robots, req.observed_obstacles
+                # )
             res.result = True
             return res
         except Exception as e:

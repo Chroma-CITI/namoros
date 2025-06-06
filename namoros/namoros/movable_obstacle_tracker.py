@@ -225,7 +225,7 @@ class MovableObstacleTracker:
                 marker_id, marker_pose, polygon_in_marker_frame
             )
             pose2d = Pose2D(polygon_in_map.centroid.x, polygon_in_map.centroid.y, 0.0)
-            self.node.add_or_update_movable_ostable(
+            self.node.add_or_update_movable_obstable(
                 uid=marker_id, pose=pose2d, polygon=polygon_in_map
             )
 
