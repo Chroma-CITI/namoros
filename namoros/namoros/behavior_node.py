@@ -393,9 +393,7 @@ class NamoBehaviorNode(Node):
                 obstacle_name = param.value.string_value
 
         if robot_name and robot_name != self.agent_id and obstacle_name is not None:
-            self.state.world_state_tracker.release_obstacle(
-                robot_id=robot_name, obstacle_id=obstacle_name
-            )
+            self.state.world_state_tracker.release_obstacle(robot_id=robot_name)
 
     def publish_robot_info(self):
         entity = NamoEntity()
@@ -522,9 +520,9 @@ class NamoBehaviorNode(Node):
         req.path = path
         res: SimulatePath.Response = self.srv_simulate_path.call(req)
 
-    def synchronize_planner(self, current_action_index: int = -1):
+    def synchronize_planner(self, path_index: int = -1, action_index: int = -1):
         self.get_logger().info(
-            f"Synchronizing planner state (action_index={current_action_index})"
+            f"Synchronizing planner state (path_index={path_index}, action_index={action_index})"
         )
         robot_pose = self.lookup_robot_pose()
         if robot_pose is None:
@@ -532,7 +530,8 @@ class NamoBehaviorNode(Node):
             return
         robot_pose = utils.entity_pose_to_pose2d(robot_pose.pose)
         req = SynchronizeState.Request()
-        req.current_action_index = current_action_index
+        req.path_index = path_index
+        req.action_index = action_index
         req.observed_robot_pose.x = robot_pose.x
         req.observed_robot_pose.y = robot_pose.y
         req.observed_robot_pose.angle_degrees = robot_pose.degrees

@@ -247,43 +247,43 @@ class PlannerNode(Node):
                 res.result = True
                 return res
 
-            if req.current_action_index >= 0:
-                # Here we are setting the planner to a specific action index
-                assert isinstance(
-                    self.current_plan.get_all_actions()[req.current_action_index], Grab
+            if req.path_index >= 0 and req.action_index >= 0:
+                self.get_logger().info(
+                    f"Setting plan to path {req.path_index}, action {req.action_index}"
                 )
-                self.current_plan.set_current_action_index(req.current_action_index)
-                current_path = self.current_plan.get_current_path()
+                self.current_plan.set_current_action_index(
+                    req.path_index, req.action_index
+                )
 
-                poses = self.current_plan.get_all_robot_poses()
-                pose = poses[req.current_action_index]
+                path = self.current_plan.paths[req.path_index]
+                robot_pose = path.robot_path.poses[req.action_index]
                 self.namo_planner.reset_robot_pose(
-                    self.agent_id, pose=Pose2D(pose[0], pose[1], pose[2])
+                    self.agent_id,
+                    pose=Pose2D(robot_pose[0], robot_pose[1], robot_pose[2]),
                 )
 
                 observed_obstacles: t.List[NamoEntity] = []
-                if current_path.is_transfer:
-                    assert isinstance(current_path, TransferPath)
-                    obstacle_pose = current_path.obstacle_path.poses[
-                        current_path.action_index
-                    ]
+                if path.is_transfer:
+                    assert isinstance(path, TransferPath)
+                    obstacle_pose = path.obstacle_path.poses[path.action_index]
                     self.namo_planner.reset_obstacle_pose(
-                        current_path.obstacle_uid, obstacle_pose
+                        path.obstacle_uid, obstacle_pose
                     )
 
                     for obs in t.cast(t.List[NamoEntity], req.observed_obstacles):
-                        if obs.entity_id != current_path.obstacle_uid:
+                        if obs.entity_id != path.obstacle_uid:
                             observed_obstacles.append(obs)
                 else:
+                    self.namo_planner.world.drop_obstacle(self.agent_id)
                     observed_obstacles = req.observed_obstacles  # type: ignore
 
                 self.namo_planner.synchronize_state(
                     req.other_observed_robots, observed_obstacles
                 )
             else:
-                poses = self.current_plan.get_all_robot_poses()
-                start_idx = self.current_plan.get_current_action_index()
-                poses = poses[start_idx : start_idx + 10]
+                path = self.current_plan.get_current_path()
+                start_idx = path.action_index
+                poses = path.robot_path.poses[start_idx:-1]
                 robot_pose = Pose2D(
                     req.observed_robot_pose.x,
                     req.observed_robot_pose.y,

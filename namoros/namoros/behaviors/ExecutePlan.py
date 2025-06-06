@@ -62,7 +62,7 @@ class ExecutePlan(py_trees.behaviour.Behaviour):
         )
         return postpone_root
 
-    def create_grab_tree(self, path_start_action_idx: int, path: NamoPath):
+    def create_grab_tree(self, path_index: int, path: NamoPath):
         if not self.node.state.plan:
             raise Exception("No plan")
         if not path.is_transfer:
@@ -78,7 +78,7 @@ class ExecutePlan(py_trees.behaviour.Behaviour):
                 ClearLocalCostmap(node=self.node),
                 FaceObstacle(node=self.node, obstacle_id=obstacle_id),
                 ManualSyncPlanner(
-                    node=self.node, current_action_index=path_start_action_idx
+                    node=self.node, path_index=path_index, action_index=0
                 ),
                 # Grab(node=self.node, path=path),
                 Approach(node=self.node, obstacle_id=obstacle_id),
@@ -86,7 +86,7 @@ class ExecutePlan(py_trees.behaviour.Behaviour):
         )
         return root
 
-    def create_release_tree(self, path: NamoPath):
+    def create_release_tree(self, path: NamoPath, path_index: int):
         if not self.node.state.plan:
             raise Exception("No plan")
         obstacle_id: str = path.obstacle_id  # type: ignore
@@ -98,6 +98,9 @@ class ExecutePlan(py_trees.behaviour.Behaviour):
                 PlaySound(node=self.node, sound=Sound.CLEANINGSTART),
                 Release(node=self.node),
                 BackUp(node=self.node, distance=self.node.agent.grab_start_distance),
+                ManualSyncPlanner(
+                    node=self.node, path_index=path_index, action_index=0
+                ),
                 UnignoreObstacleSync(node=self.node, obstacle_id=obstacle_id),
                 Pause(node=self.node, seconds=2.0),
             ],
@@ -124,12 +127,11 @@ class ExecutePlan(py_trees.behaviour.Behaviour):
 
         paths: t.List[NamoPath] = self.node.state.plan.paths  # type: ignore
 
-        path_start_action_idx = 0
-        for namo_path in paths:
+        for path_index, namo_path in enumerate(paths):
             nav_path = copy.deepcopy(namo_path.path)
             if namo_path.is_transfer:
                 assert namo_path.obstacle_id
-                grab = self.create_grab_tree(path_start_action_idx, namo_path)
+                grab = self.create_grab_tree(path_index, namo_path)
                 root.add_child(grab)
                 # remove the pre-grab and post-release poses since those are executed manually
                 nav_path.poses = nav_path.poses[1:-1]  # type: ignore
@@ -158,10 +160,11 @@ class ExecutePlan(py_trees.behaviour.Behaviour):
             if namo_path.is_evasion:
                 root.add_child(TriggerReplan(node=self.node))
             if namo_path.is_transfer:
-                release = self.create_release_tree(path=namo_path)
+                release = self.create_release_tree(
+                    path_index=path_index + 1, path=namo_path
+                )
                 root.add_child(release)
 
-            path_start_action_idx += len(namo_path.actions)
         return BehaviourTree(root)
 
     def initialise(self):

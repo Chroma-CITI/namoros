@@ -1,6 +1,7 @@
 namoros_msgs/NamoPose observed_robot_pose
 namoros_msgs/NamoEntity[] observed_obstacles
 namoros_msgs/NamoEntity[] other_observed_robots
-int32 current_action_index -1
+int32 path_index -1
+int32 action_index -1
 ---
 bool result
