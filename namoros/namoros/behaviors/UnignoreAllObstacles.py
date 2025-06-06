@@ -2,9 +2,9 @@ from namoros.behavior_node import NamoBehaviorNode
 import py_trees
 
 
-class UnignoreAllObstacleSync(py_trees.behaviour.Behaviour):
+class UnignoreAllObstacles(py_trees.behaviour.Behaviour):
     def __init__(self, node: NamoBehaviorNode):
-        super().__init__(name="UnignoreAllObstacleSync")
+        super().__init__(name="UnignoreAllObstacles")
         self.node = node
 
     def initialise(self):

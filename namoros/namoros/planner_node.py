@@ -1,3 +1,4 @@
+import traceback
 import typing as t
 from namoros.namo_planner import NamoPlanner
 from namoros.utils import Pose2D, entity_pose_to_pose2d
@@ -32,6 +33,8 @@ from namosim.navigation.navigation_plan import Plan
 from namosim.navigation.conflict import ConflictType
 from rclpy.action import ActionServer
 from rclpy.action.server import ServerGoalHandle
+from namosim.navigation.navigation_path import TransferPath
+from namoros_msgs.msg import NamoEntity
 
 
 class PlannerNode(Node):
@@ -232,11 +235,23 @@ class PlannerNode(Node):
 
     def synchronize_state(
         self, req: SynchronizeState.Request, res: SynchronizeState.Response
-    ):
-        if self.is_planning:
-            return res
-        if self.current_plan is not None:
+    ) -> SynchronizeState.Response:
+        try:
+            if self.is_planning:
+                return res
+
+            if not self.current_plan:
+                self.namo_planner.synchronize_state(
+                    req.other_observed_robots, req.observed_obstacles
+                )
+                res.result = True
+                return res
+
             if req.current_action_index >= 0:
+                # Here we are setting the planner to a specific action index
+                assert isinstance(
+                    self.current_plan.get_all_actions()[req.current_action_index], Grab
+                )
                 self.current_plan.set_current_action_index(req.current_action_index)
                 current_path = self.current_plan.get_current_path()
 
@@ -246,13 +261,25 @@ class PlannerNode(Node):
                     self.agent_id, pose=Pose2D(pose[0], pose[1], pose[2])
                 )
 
+                observed_obstacles: t.List[NamoEntity] = []
                 if current_path.is_transfer:
+                    assert isinstance(current_path, TransferPath)
                     obstacle_pose = current_path.obstacle_path.poses[
                         current_path.action_index
                     ]
                     self.namo_planner.reset_obstacle_pose(
                         current_path.obstacle_uid, obstacle_pose
                     )
+
+                    for obs in t.cast(t.List[NamoEntity], req.observed_obstacles):
+                        if obs.entity_id != current_path.obstacle_uid:
+                            observed_obstacles.append(obs)
+                else:
+                    observed_obstacles = req.observed_obstacles  # type: ignore
+
+                self.namo_planner.synchronize_state(
+                    req.other_observed_robots, observed_obstacles
+                )
             else:
                 poses = self.current_plan.get_all_robot_poses()
                 start_idx = self.current_plan.get_current_action_index()
@@ -277,11 +304,18 @@ class PlannerNode(Node):
                     action = self.current_plan.pop_next_action()
                     self.namo_planner.step_simulation({self.agent_id: action})
 
-        self.namo_planner.synchronize_state(
-            req.other_observed_robots, req.observed_obstacles
-        )
-        res.result = True
-        return res
+                self.namo_planner.synchronize_state(
+                    req.other_observed_robots, req.observed_obstacles
+                )
+            res.result = True
+            return res
+        except Exception as e:
+            self.get_logger().error(
+                f"An error occurred during synchronize state: {str(e)}"
+            )
+            self.get_logger().error(f"Traceback: {traceback.format_exc()}")
+            res.result = False
+            return res
 
     def detect_conflicts(
         self, req: DetectConflicts.Request, res: DetectConflicts.Response

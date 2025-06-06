@@ -12,11 +12,13 @@ from namoros.behaviors.ComputePlan import ComputePlan
 from namoros.behaviors.ClearNewMovables import ClearNewMovables
 from namoros.behaviors.ExecutePlan import ExecutePlan
 from namoros.behaviors.InterruptRobot import InterruptRobot
+from namoros.behaviors.ManualSyncPlanner import ManualSyncPlanner
 from namoros.behaviors.NewObstacleGuard import NewObstacleGuard
 from namoros.behaviors.PlaySound import PlaySound
 from namoros.behaviors.Release import Release
 from namoros.behaviors.ReplanGuard import ReplanGuard
 from namoros.behaviors.SynchronizePlannerPeriodic import SynchronizePlannerPeriodic
+from namoros.behaviors.UnignoreAllObstacles import UnignoreAllObstacles
 from namoros.behaviors.UpdatePlanGuard import UpdatePlanGuard
 from namoros.behaviors.UpdatePlan import UpdatePlan
 
@@ -70,6 +72,8 @@ def create_namo_tree(node: NamoBehaviorNode) -> Behaviour:
         children=[
             InterruptRobot(node=node),
             Release(node=node),
+            UnignoreAllObstacles(node=node),
+            ManualSyncPlanner(node=node),
             ComputePlan(node=node),
             excute_plan_root,
         ],
@@ -112,7 +116,13 @@ def main(args=None):
     root = create_namo_tree(node=node)
     tree = BehaviourTree(root=root, unicode_tree_debug=False)
     tree.setup(node=node)
-    py_trees.display.render_dot_tree(root, name="behavior_tree", target_directory=".")
+    py_trees.display.render_dot_tree(
+        root,
+        name="behavior_tree",
+        target_directory=".",
+        collapse_decorators=True,
+        visibility_level=py_trees.common.VisibilityLevel.COMPONENT,
+    )
     snapshot_visitor = py_trees.visitors.DebugVisitor()
 
     def post_tick_handler(tree: BehaviourTree):

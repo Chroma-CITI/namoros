@@ -316,9 +316,9 @@ class NamoPlanner:
                         ):
                             continue
 
-                        self.world.entity_to_agent[robot_held_obstacle.uid] = (
-                            robot.entity_id
-                        )
+                        self.world.entity_to_agent[
+                            robot_held_obstacle.uid
+                        ] = robot.entity_id
                 else:
                     # TODO
                     pass

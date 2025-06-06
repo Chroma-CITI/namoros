@@ -16,7 +16,10 @@
   "executionEnvironments": [
     {
       "root": "./namoros",
-      "extraPaths": ["./namosim/namosim"]
+      "extraPaths": [
+        "./namosim",
+        "./install/namoros_msgs/local/lib/python3.10/dist-packages"
+      ]
     }
   ]
 }

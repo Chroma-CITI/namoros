@@ -213,14 +213,14 @@ class NamoBehaviorNode(Node):
             # subscriptions
             self.obstacle_pose_subscriptions = {}
             for obstacle in self.namoros_config.obstacles:
-                self.obstacle_pose_subscriptions[obstacle.name] = (
-                    self.create_subscription(
-                        PoseArray,
-                        f"/model/{obstacle.name}/pose",
-                        self.create_obstacle_pose_callback(obstacle.name),
-                        1,
-                        callback_group=self.main_cb_group,
-                    )
+                self.obstacle_pose_subscriptions[
+                    obstacle.name
+                ] = self.create_subscription(
+                    PoseArray,
+                    f"/model/{obstacle.name}/pose",
+                    self.create_obstacle_pose_callback(obstacle.name),
+                    1,
+                    callback_group=self.main_cb_group,
                 )
 
         # publishers
@@ -317,9 +317,9 @@ class NamoBehaviorNode(Node):
 
         # Set covariance (example: low uncertainty)
         msg.pose.covariance = np.zeros(36)  # 6x6 matrix flattened
-        msg.pose.covariance[0] = variance_xy**2  # Variance in x
-        msg.pose.covariance[7] = variance_xy**2  # Variance in y
-        msg.pose.covariance[35] = variance_yaw**2  # Variance in yaw
+        msg.pose.covariance[0] = variance_xy ** 2  # Variance in x
+        msg.pose.covariance[7] = variance_xy ** 2  # Variance in y
+        msg.pose.covariance[35] = variance_yaw ** 2  # Variance in yaw
 
         self.pub_init_pose.publish(msg)
         self.get_logger().info(
@@ -354,14 +354,11 @@ class NamoBehaviorNode(Node):
         total_len = len(data.ranges)
         center_index = int(round((total_len / 2.0) - 1))
         min_dist = float("inf")
-        min_index = -1
         values_around = 5
         for i in range(0, values_around + 1):
             if min_dist > data.ranges[center_index + i]:
-                min_index = center_index + i
                 min_dist = data.ranges[center_index + i]
             if min_dist > data.ranges[center_index - i]:
-                min_index = center_index + i
                 min_dist = data.ranges[center_index - i]
         self.forward_dist_to_obstacle = min_dist
 
@@ -381,7 +378,7 @@ class NamoBehaviorNode(Node):
                 obstacle_name = param.value.string_value
 
         if robot_name and robot_name != self.agent_id and obstacle_name is not None:
-            self.state.world_state_tracker.grabbed_obstacle(
+            self.state.world_state_tracker.grab_obstacle(
                 robot_id=robot_name, obstacle_id=obstacle_name
             )
 
@@ -396,7 +393,7 @@ class NamoBehaviorNode(Node):
                 obstacle_name = param.value.string_value
 
         if robot_name and robot_name != self.agent_id and obstacle_name is not None:
-            self.state.world_state_tracker.released_obstacle(
+            self.state.world_state_tracker.release_obstacle(
                 robot_id=robot_name, obstacle_id=obstacle_name
             )
 
@@ -526,7 +523,9 @@ class NamoBehaviorNode(Node):
         res: SimulatePath.Response = self.srv_simulate_path.call(req)
 
     def synchronize_planner(self, current_action_index: int = -1):
-        self.get_logger().info("Synchronizing planner state")
+        self.get_logger().info(
+            f"Synchronizing planner state (action_index={current_action_index})"
+        )
         robot_pose = self.lookup_robot_pose()
         if robot_pose is None:
             self.get_logger().warn("Failed to lookup robot pose")
@@ -555,6 +554,8 @@ class NamoBehaviorNode(Node):
         observed_obstacles: t.List[NamoEntity] = []
         if self.omniscient_obstacle_perception:
             for obs_id, obs_pose in self.state.world_state_tracker.obstacles.items():
+                if obs_id in self.state.ignored_obstacles:
+                    continue
                 pose2d = utils.entity_pose_to_pose2d(obs_pose)
                 obs_msg = NamoEntity()
                 obs_msg.entity_id = obs_id
@@ -567,7 +568,6 @@ class NamoBehaviorNode(Node):
         self.srv_synchronize_planner.call(req)
 
     def detect_conflicts(self):
-        self.get_logger().info("Detecting conflicts")
         req = DetectConflicts.Request()
         res: DetectConflicts.Response = self.srv_detect_conflicts.call(req)
         return res.conflicts
@@ -654,6 +654,9 @@ class NamoBehaviorNode(Node):
         self.get_logger().info(f"Publishing params {str(params.__slots__)}.")
         self.grab_publisher.publish(params)
         self.update_robot_footprint_for_grab(obs_marker_id=obs_marker_id)
+        self.state.world_state_tracker.grab_obstacle(
+            robot_id=self.agent_id, obstacle_id=obstacle_name
+        )
 
     def release(self):
         self.get_logger().info(f"Release.")
@@ -666,6 +669,7 @@ class NamoBehaviorNode(Node):
             params.params = [robot_id, robot_link]
             self.release_publisher.publish(params)
         self.update_robot_footprint_for_release()
+        self.state.world_state_tracker.release_obstacle(robot_id=self.agent_id)
 
     def pose_info_callback(self, msg: PoseArray):
         for pose in msg.poses:

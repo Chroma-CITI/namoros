@@ -26,10 +26,10 @@ class WorldStateTracker:
         # entity.pose.angle_degrees = pose.degrees
         self.obstacles[entity_id] = pose
 
-    def grabbed_obstacle(self, robot_id: str, obstacle_id: str):
+    def grab_obstacle(self, robot_id: str, obstacle_id: str):
         self.robot_to_obstacle[robot_id] = obstacle_id
 
-    def released_obstacle(self, robot_id: str, obstacle_id: str):
+    def release_obstacle(self, robot_id: str):
         if robot_id in self.robot_to_obstacle:
             del self.robot_to_obstacle[robot_id]
 

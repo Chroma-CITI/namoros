@@ -3,19 +3,11 @@ import py_trees
 
 
 class IgnoreObstacleSync(py_trees.behaviour.Behaviour):
-    def __init__(
-        self, node: NamoBehaviorNode, obstacle_id: str, unignore: bool = False
-    ):
+    def __init__(self, node: NamoBehaviorNode, obstacle_id: str):
         super().__init__(name="IgnoreObstacleSync")
         self.node = node
         self.obstacle_id = obstacle_id
-        self.unignore = unignore
-
-    def initialise(self):
-        if self.unignore:
-            self.node.state.unignore_obstacle(self.obstacle_id)
-        else:
-            self.node.state.ignore_obstacle(self.obstacle_id)
 
     def update(self):
+        self.node.state.ignore_obstacle(self.obstacle_id)
         return py_trees.common.Status.SUCCESS

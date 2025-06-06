@@ -6,6 +6,7 @@ from namoros.behaviors.IgnoreObstacleSync import IgnoreObstacleSync
 from namoros.behaviors.ManualSyncPlanner import ManualSyncPlanner
 from namoros.behaviors.Backup import BackUp
 from namoros.behaviors.Release import Release
+from namoros.behaviors.UnignoreObstacleSync import UnignoreObstacleSync
 from namoros_msgs.msg._namo_path import NamoPath
 from py_trees.behaviour import Behaviour
 from py_trees.composites import Selector, Sequence
@@ -21,7 +22,7 @@ from namoros.behaviors.Pause import Pause
 from namoros.behaviors.PlaySound import PlaySound
 from namoros.behaviors.RedetectObstacle import RedetectObstacle
 from namoros.behaviors.TriggerReplan import TriggerReplan
-from namoros.behaviors.UnignoreAllObstacleSync import UnignoreAllObstacleSync
+from namoros.behaviors.UnignoreAllObstacles import UnignoreAllObstacles
 
 
 class ExecutePlan(py_trees.behaviour.Behaviour):
@@ -41,7 +42,8 @@ class ExecutePlan(py_trees.behaviour.Behaviour):
                     memory=True,
                     children=[
                         Release(node=self.node),
-                        UnignoreAllObstacleSync(node=self.node),
+                        UnignoreAllObstacles(node=node),
+                        ManualSyncPlanner(node=node),
                         TriggerReplan(node=node, update_plan=True),
                     ],
                 ),
@@ -96,15 +98,14 @@ class ExecutePlan(py_trees.behaviour.Behaviour):
                 PlaySound(node=self.node, sound=Sound.CLEANINGSTART),
                 Release(node=self.node),
                 BackUp(node=self.node, distance=self.node.agent.grab_start_distance),
-                IgnoreObstacleSync(
-                    node=self.node, obstacle_id=obstacle_id, unignore=True
-                ),
+                UnignoreObstacleSync(node=self.node, obstacle_id=obstacle_id),
                 Pause(node=self.node, seconds=2.0),
             ],
         )
 
         if not self.node.omniscient_obstacle_perception:
             root.add_child(RedetectObstacle(node=self.node, obstacle_id=obstacle_id))
+        root.add_child(TriggerReplan(node=self.node))
         return root
 
     def create_sub_tree(self):

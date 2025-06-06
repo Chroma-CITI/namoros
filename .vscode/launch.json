@@ -34,6 +34,17 @@
       "program": "${file}",
       "console": "integratedTerminal",
       "justMyCode": false
+    },
+    {
+      "label": "Source ROS 2 Workspace",
+      "type": "shell",
+      "command": "source ~/ros2_ws/install/setup.bash",
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "presentation": {
+        "reveal": "never"
+      }
     }
   ]
 }

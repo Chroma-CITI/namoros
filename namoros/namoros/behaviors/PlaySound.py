@@ -10,6 +10,7 @@ class PlaySound(py_trees.behaviour.Behaviour):
         self.node = node
         self.sound = sound
         self._status = Status.INVALID
+        self.blackbox_level = py_trees.common.BlackBoxLevel.DETAIL
 
     def initialise(self):
         self._status = Status.RUNNING

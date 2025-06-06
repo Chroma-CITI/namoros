@@ -36,7 +36,6 @@ class RedetectObstacle(py_trees.behaviour.Behaviour):
                 f"Successfully redetected obstacle {self.obtacle_id}"
             )
             self.node.state.movable_obstacle_tracker.update_obstacle_polygons()
-            self.node.trigger_a_replan()
         else:
             n = len(
                 self.node.state.movable_obstacle_tracker.detected_movables.get(
