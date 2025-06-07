@@ -281,7 +281,9 @@ class PlannerNode(Node):
                         if obs.entity_id != path.obstacle_uid:
                             observed_obstacles.append(obs)
                 else:
-                    self.namo_planner.world.drop_obstacle(self.agent_id)
+                    self.namo_planner.world.drop_obstacle(
+                        self.agent_id, resolve_collisions=False
+                    )
                     observed_obstacles = req.observed_obstacles  # type: ignore
 
                 self.namo_planner.synchronize_state(

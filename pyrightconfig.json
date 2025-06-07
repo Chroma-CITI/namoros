@@ -6,10 +6,10 @@
     "DEBUG": true
   },
   "reportMissingImports": "error",
-  "reportMissingTypeStubs": "warning",
-  "reportIncompatibleMethodOverride": false,
+  "reportMissingTypeStubs": false,
+  "reportIncompatibleMethodOverride": "warning",
   "reportAttributeAccessIssue": "warning",
-  "reportArgumentType": false,
+  "reportArgumentType": "warning",
   "reportOptionalMemberAccess": "warning",
   "pythonVersion": "3.10",
   "pythonPlatform": "Linux",

@@ -78,10 +78,9 @@ class ExecutePlan(py_trees.behaviour.Behaviour):
                 ClearGlobalCostmap(node=self.node),
                 ClearLocalCostmap(node=self.node),
                 FaceObstacle(node=self.node, obstacle_id=obstacle_id),
-                # ManualSyncPlanner(
-                #     node=self.node, path_index=path_index, action_index=0
-                # ),
-                # Grab(node=self.node, path=path),
+                ManualSyncPlanner(
+                    node=self.node, path_index=path_index, action_index=0
+                ),
                 Approach(node=self.node, obstacle_id=obstacle_id),
                 ManualSyncPlanner(
                     node=self.node, path_index=path_index, action_index=1
@@ -124,7 +123,7 @@ class ExecutePlan(py_trees.behaviour.Behaviour):
         if self.node.state.plan.postpone_steps > 0:
             root.add_child(
                 self.create_postpone_tree(
-                    seconds=self.node.state.plan.postpone_steps * 0.5
+                    seconds=self.node.state.plan.postpone_steps * 0.3
                 )
             )
             return BehaviourTree(root)

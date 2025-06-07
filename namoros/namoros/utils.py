@@ -9,6 +9,7 @@ from shapely import affinity
 from shapely.geometry import Polygon as ShapelyPolygon
 from std_msgs.msg import Header
 from geometry_msgs.msg import PoseStamped, TransformStamped
+from namosim.data_models import Pose2D
 
 
 def euler_to_quat(
@@ -45,12 +46,6 @@ def ros_polygon_to_shapely_polygon(ros_polygon: Polygon):
 def scale_polygon(polygon: ShapelyPolygon, scale: float) -> ShapelyPolygon:
     scaled_polygon = affinity.scale(polygon, xfact=scale, yfact=scale, origin=(0, 0, 0))  # type: ignore
     return scaled_polygon  # type: ignore
-
-
-class Pose2D(t.NamedTuple):
-    x: float
-    y: float
-    degrees: float
 
 
 def entity_pose_to_pose2d(p: Pose) -> Pose2D:
