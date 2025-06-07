@@ -242,7 +242,7 @@ class PlannerNode(Node):
 
             if not self.current_plan:
                 self.namo_planner.synchronize_state(
-                    req.other_observed_robots, req.observed_obstacles
+                    req.other_observed_robots, req.observed_obstacles  # type: ignore
                 )
                 res.result = True
                 return res
@@ -313,9 +313,9 @@ class PlannerNode(Node):
                     action = self.current_plan.pop_next_action()
                     self.namo_planner.step_simulation({self.agent_id: action})
 
-                # self.namo_planner.synchronize_state(
-                #     req.other_observed_robots, req.observed_obstacles
-                # )
+                self.namo_planner.synchronize_state(
+                    req.other_observed_robots, req.observed_obstacles
+                )
             res.result = True
             return res
         except Exception as e:

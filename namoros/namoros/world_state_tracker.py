@@ -18,12 +18,6 @@ class WorldStateTracker:
         self.robots[robot.entity_id] = robot
 
     def update_obstacle(self, entity_id: str, pose: Pose):
-        # entity = NamoEntity()
-        # entity.entity_id = entity_id
-        # entity.pose.x = pose.position.x
-        # entity.pose.y = pose.position.y
-        # entity.pose.z = pose.position.z
-        # entity.pose.angle_degrees = pose.degrees
         self.obstacles[entity_id] = pose
 
     def grab_obstacle(self, robot_id: str, obstacle_id: str):

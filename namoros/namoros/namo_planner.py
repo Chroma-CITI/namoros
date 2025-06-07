@@ -310,7 +310,9 @@ class NamoPlanner:
             for robot in other_robots:
                 if robot.entity_id in self.world.agents:
                     pose = Pose2D(robot.pose.x, robot.pose.y, robot.pose.angle_degrees)
-                    self.reset_robot_pose(robot.entity_id, pose)
+                    self.reset_robot_pose(
+                        robot.entity_id, pose, resolve_collisions=True
+                    )
 
                     if robot.holding_other_entity_id != "":
                         robot_held_obstacle = self.world.get_movable_obstacles()[
@@ -336,11 +338,12 @@ class NamoPlanner:
 
                 existing_obstacles = self.world.get_movable_obstacles()
                 if obstacle.entity_id in existing_obstacles:
-                    obs = existing_obstacles[obstacle.entity_id]
                     pose = Pose2D(
                         obstacle.pose.x, obstacle.pose.y, obstacle.pose.angle_degrees
                     )
-                    self.reset_obstacle_pose(obstacle.entity_id, pose)
+                    self.reset_obstacle_pose(
+                        obstacle.entity_id, pose, resolve_collisions=False
+                    )
                 else:
                     # TODO
                     pass
