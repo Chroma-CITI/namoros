@@ -165,7 +165,9 @@ class NamoBehaviorNode(Node):
             world = World.load_from_svg(self.scenario_file)
         else:
             world = World.load_from_yaml(self.scenario_file)
-        self.agent: Stilman2005Agent = world.agents[self.agent_id]
+        self.agent: Stilman2005Agent = t.cast(
+            Stilman2005Agent, world.agents[self.agent_id]
+        )
         self.robot_radius = world.agents[self.agent_id].circumscribed_radius
 
         self.main_cb_group = MutuallyExclusiveCallbackGroup()
@@ -261,12 +263,6 @@ class NamoBehaviorNode(Node):
             "namo_planner/add_or_update_movable_obstacle",
             callback_group=self.add_or_update_movable_obstacle_cb_group,
         )
-        self.srv_simulate_path = self.create_client(
-            SimulatePath,
-            "namo_planner/simulate_path",
-            callback_group=self.namo_cb_group,
-        )
-
         self.sync_cb_group = ReentrantCallbackGroup()
         self.srv_synchronize_planner = self.create_client(
             SynchronizeState,
@@ -514,11 +510,6 @@ class NamoBehaviorNode(Node):
             req
         )
         self.get_logger().info("Done adding obstacle")
-
-    def simulate_path(self, path: NamoPath):
-        req = SimulatePath.Request()
-        req.path = path
-        res: SimulatePath.Response = self.srv_simulate_path.call(req)
 
     def synchronize_planner(self, path_index: int = -1, action_index: int = -1):
         self.get_logger().info(

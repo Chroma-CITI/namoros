@@ -180,7 +180,7 @@ class NamoPlanner:
             movability=Movability.MOVABLE,
         )
         self.world.add_entity(movable)
-        self.world.resolve_collisions(movable.uid)
+        # self.world.resolve_collisions(movable.uid)
         for agent in self.world.agents.values():
             agent.init(self.world)
 
