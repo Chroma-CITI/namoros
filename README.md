@@ -13,8 +13,8 @@ This repo consists of the following ROS2 packages:
 First, clone the repo.
 
 ```bash
-git clone https://gitlab.inria.fr/chroma/namo/namoros.git
-cd namosim
+git clone --recurse-submodules git@gitlab.inria.fr:chroma/namo/namoros.git
+cd namoros
 ```
 
 Next, use `rosdep` to install the dependencies listed in the `package.xml` files:
