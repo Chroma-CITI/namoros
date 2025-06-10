@@ -308,28 +308,22 @@ class NamoPlanner:
             held_obstacle = self.world.get_agent_held_obstacle(self.agent.uid)
 
             for robot in other_robots:
-                if robot.entity_id in self.world.agents:
-                    pose = Pose2D(robot.pose.x, robot.pose.y, robot.pose.angle_degrees)
-                    self.reset_robot_pose(
-                        robot.entity_id, pose, resolve_collisions=True
+                if robot.entity_id not in self.world.agents:
+                    continue
+
+                if not robot.holding_other_entity_id:
+                    self.world.drop_obstacle(robot.entity_id, resolve_collisions=False)
+
+                pose = Pose2D(robot.pose.x, robot.pose.y, robot.pose.angle_degrees)
+                self.reset_robot_pose(robot.entity_id, pose, resolve_collisions=True)
+
+                if held_obstacle and robot.holding_other_entity_id == held_obstacle.uid:
+                    # other robot is holding the same obstacle as this robot
+                    # how to handle this?
+                    self.logger.warning(
+                        f"Robot {robot.entity_id} is holding the same obstacle as this robot: {held_obstacle.uid}"
                     )
-
-                    if robot.holding_other_entity_id != "":
-                        robot_held_obstacle = self.world.get_movable_obstacles()[
-                            robot.holding_other_entity_id
-                        ]
-                        if (
-                            held_obstacle
-                            and robot_held_obstacle.uid == held_obstacle.uid
-                        ):
-                            continue
-
-                        self.world.entity_to_agent[
-                            robot_held_obstacle.uid
-                        ] = robot.entity_id
-                else:
-                    # TODO
-                    pass
+                    continue
 
             for obstacle in obstacles:
                 if held_obstacle and held_obstacle.uid == obstacle.entity_id:

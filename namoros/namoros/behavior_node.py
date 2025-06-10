@@ -73,29 +73,36 @@ class NamoState:
         self.clock = clock
         self.replan_count: int = 0
         self.publish_init_pose_count = 0
+        self.goal_pose: PoseStamped | None = None
+        self.goals = copy.deepcopy(agent._navigation_goals)
         self.reset()
 
     def reset(self):
         self._replan_flag: bool = False
         self._update_plan_flag: bool = False
-        self.goal_pose: PoseStamped | None = None
         self.bumper_pressed: bool = False
         self.movable_obstacle_tracker = MovableObstacleTracker(self.node)
         self.forward_dist_to_obstacle: float = float("inf")
         self.plan: NamoPlan | None = None
         self.world_state_tracker = WorldStateTracker()
         self.ignored_obstacles: t.Set[str] = set()
-        self.init_goals()
+        self.init_goal()
 
-    def init_goals(self):
-        goal = self.agent.get_current_or_next_goal()
-        if goal:
+    def init_goal(self):
+        self.goal_pose = None
+        if self.goal_pose is None and len(self.goals) > 0:
+            goal = self.goals[0]
             header = Header()
             header.frame_id = "map"
             header.stamp = self.clock.now().to_msg()
             self.goal_pose = utils.construct_ros_pose(
                 x=goal.pose[0], y=goal.pose[1], z=0.0, theta=goal.pose[2], header=header
             )
+
+    def init_next_goal(self):
+        if len(self.goals):
+            self.goals.pop(0)
+        self.init_goal()
 
     def ignore_obstacle(self, obstacle_id: str):
         self.ignored_obstacles.add(obstacle_id)
@@ -215,14 +222,14 @@ class NamoBehaviorNode(Node):
             # subscriptions
             self.obstacle_pose_subscriptions = {}
             for obstacle in self.namoros_config.obstacles:
-                self.obstacle_pose_subscriptions[
-                    obstacle.name
-                ] = self.create_subscription(
-                    PoseArray,
-                    f"/model/{obstacle.name}/pose",
-                    self.create_obstacle_pose_callback(obstacle.name),
-                    1,
-                    callback_group=self.main_cb_group,
+                self.obstacle_pose_subscriptions[obstacle.name] = (
+                    self.create_subscription(
+                        PoseArray,
+                        f"/model/{obstacle.name}/pose",
+                        self.create_obstacle_pose_callback(obstacle.name),
+                        1,
+                        callback_group=self.main_cb_group,
+                    )
                 )
 
         # publishers
@@ -313,9 +320,9 @@ class NamoBehaviorNode(Node):
 
         # Set covariance (example: low uncertainty)
         msg.pose.covariance = np.zeros(36)  # 6x6 matrix flattened
-        msg.pose.covariance[0] = variance_xy ** 2  # Variance in x
-        msg.pose.covariance[7] = variance_xy ** 2  # Variance in y
-        msg.pose.covariance[35] = variance_yaw ** 2  # Variance in yaw
+        msg.pose.covariance[0] = variance_xy**2  # Variance in x
+        msg.pose.covariance[7] = variance_xy**2  # Variance in y
+        msg.pose.covariance[35] = variance_yaw**2  # Variance in yaw
 
         self.pub_init_pose.publish(msg)
         self.get_logger().info(
@@ -512,9 +519,6 @@ class NamoBehaviorNode(Node):
         self.get_logger().info("Done adding obstacle")
 
     def synchronize_planner(self, path_index: int = -1, action_index: int = -1):
-        self.get_logger().info(
-            f"Synchronizing planner state (path_index={path_index}, action_index={action_index})"
-        )
         robot_pose = self.lookup_robot_pose()
         if robot_pose is None:
             self.get_logger().warn("Failed to lookup robot pose")

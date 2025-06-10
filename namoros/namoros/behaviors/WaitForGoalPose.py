@@ -12,6 +12,7 @@ class WaitForGoalPose(py_trees.behaviour.Behaviour):
         if self.node.state.goal_pose is None:
             self.status = py_trees.common.Status.RUNNING
             self.node.get_logger().info("Waiting for goal pose")
+            self.node.publish_status_marker(f"WAITING FOR GOAL")
         else:
             self.status = py_trees.common.Status.SUCCESS
         return self.status

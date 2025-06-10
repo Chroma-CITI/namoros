@@ -13,6 +13,7 @@ class WaitForInitPose(py_trees.behaviour.Behaviour):
         if robot_pose is None:
             self.status = py_trees.common.Status.RUNNING
             self.node.get_logger().info("Waiting for robot pose")
+            self.node.publish_status_marker(f"WAITING INITIAL POSE")
         else:
             self.status = py_trees.common.Status.SUCCESS
         return self.status

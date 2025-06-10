@@ -61,7 +61,8 @@ class PlannerNode(Node):
             logger=self.get_logger(),
         )
         self.namo_planner.publish_world()
-        self.services_cb_group = ReentrantCallbackGroup()
+
+        callback_group = MutuallyExclusiveCallbackGroup()
         self.sub_map = self.create_subscription(
             OccupancyGrid, "map", self.map_callback, 1
         )
@@ -69,20 +70,20 @@ class PlannerNode(Node):
             AddOrUpdateMovableObstacle,
             "namo_planner/add_or_update_movable_obstacle",
             self.add_or_update_obstacle_callback,
-            callback_group=self.services_cb_group,
+            callback_group=callback_group,
         )
 
         self.srv_simulate_path = self.create_service(
             SimulatePath,
             "namo_planner/simulate_path",
             self.simulate_path_callback,
-            callback_group=self.services_cb_group,
+            callback_group=callback_group,
         )
         self.srv_get_entity_polygon = self.create_service(
             GetEntityPolygon,
             "namo_planner/get_entity_polygon",
             self.get_entity_polygon_callback,
-            callback_group=self.services_cb_group,
+            callback_group=callback_group,
         )
 
         self.sync_cb_group = MutuallyExclusiveCallbackGroup()
@@ -90,36 +91,35 @@ class PlannerNode(Node):
             SynchronizeState,
             "namo_planner/synchronize_state",
             self.synchronize_state,
-            callback_group=self.sync_cb_group,
+            callback_group=callback_group,
         )
         self.srv_detect_conflicts = self.create_service(
             DetectConflicts,
             "namo_planner/detect_conflicts",
             self.detect_conflicts,
-            callback_group=self.sync_cb_group,
+            callback_group=callback_group,
         )
         self.srv_end_postpone = self.create_service(
             EndPostpone,
             "namo_planner/end_postpone",
             self.end_postpone,
-            callback_group=MutuallyExclusiveCallbackGroup(),
+            callback_group=callback_group,
         )
 
         # actions
-        compute_plan_cb_group = MutuallyExclusiveCallbackGroup()
         self.action_compute_plan = ActionServer(
             node=self,
             action_type=ComputePlan,
             action_name=f"namo_planner/compute_plan",
             execute_callback=self.compute_plan_callback,
-            callback_group=compute_plan_cb_group,
+            callback_group=callback_group,
         )
         self.action_update_plan = ActionServer(
             node=self,
             action_type=UpdatePlan,
             action_name="namo_planner/update_plan",
             execute_callback=self.update_plan_callback,
-            callback_group=compute_plan_cb_group,
+            callback_group=callback_group,
         )
 
         # state
@@ -144,16 +144,20 @@ class PlannerNode(Node):
         return res
 
     def compute_plan_callback(self, goal_handle: ServerGoalHandle):
-        try:
-            self.is_planning = True
+        self.is_planning = True
+        result = ComputePlan.Result()
 
+        try:
             goal: ComputePlan.Goal = goal_handle.request
-            result = ComputePlan.Result()
+            self.get_logger().info("Received compute plan request")
+
+            # Check for cancel request
             if goal_handle.is_cancel_requested:
                 goal_handle.canceled()
                 self.get_logger().info("Compute plan canceled")
                 return result
 
+            # Compute the plan
             self.get_logger().info("Computing plan")
             robot_pose = entity_pose_to_pose2d(goal.start_pose.pose)
             goal_pose = entity_pose_to_pose2d(goal.goal_pose.pose)
@@ -163,21 +167,30 @@ class PlannerNode(Node):
             self.namo_planner.reset_robot_pose(self.agent_id, robot_pose)
             self.namo_planner.reset_goal_pose(goal_pose)
             plan_result = self.namo_planner.compute_plan(header=header)
+
             if plan_result:
                 plan, plan_msg = plan_result
                 result.plan = plan_msg
                 self.current_plan = plan
-                self.get_logger().info(f"Finished computing plan")
+                self.get_logger().info("Finished computing plan")
+                goal_handle.succeed()  # Mark goal as succeeded
+                return result
+            else:
+                self.get_logger().error("Plan computation failed")
+                goal_handle.abort()  # Mark goal as aborted
+                return result
+
+        except Exception as e:
+            self.get_logger().error(f"Error in compute_plan_callback: {str(e)}")
+            goal_handle.abort()  # Mark goal as aborted on error
             return result
         finally:
             self.is_planning = False
 
     def update_plan_callback(self, goal_handle: ServerGoalHandle):
+        self.is_planning = True
+        result = UpdatePlan.Result()
         try:
-            self.is_planning = True
-
-            result = UpdatePlan.Result()
-
             if goal_handle.is_cancel_requested:
                 goal_handle.canceled()
                 self.get_logger().info("Update plan canceled")
@@ -191,6 +204,11 @@ class PlannerNode(Node):
                 updated_plan, update_plan_msg = think_result
                 self.current_plan = updated_plan
                 result.plan = update_plan_msg
+            goal_handle.succeed()
+            return result
+        except Exception as e:
+            self.get_logger().error(f"Error in update_plan_callback: {str(e)}")
+            goal_handle.abort()
             return result
         finally:
             self.is_planning = False
@@ -268,9 +286,9 @@ class PlannerNode(Node):
                     assert isinstance(path, TransferPath)
 
                     if path.action_index > 0:
-                        self.namo_planner.world.entity_to_agent[
-                            path.obstacle_uid
-                        ] = self.agent_id
+                        self.namo_planner.world.entity_to_agent[path.obstacle_uid] = (
+                            self.agent_id
+                        )
 
                     obstacle_pose = path.obstacle_path.poses[path.action_index]
                     self.namo_planner.reset_obstacle_pose(

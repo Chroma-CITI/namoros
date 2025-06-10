@@ -53,11 +53,19 @@ class ExecutePlan(py_trees.behaviour.Behaviour):
         return handle_conflicts_root
 
     def create_postpone_tree(self, seconds: float) -> Behaviour:
+        pause_and_sync = py_trees.composites.Parallel(
+            name="pause_and_sync",
+            policy=py_trees.common.ParallelPolicy.SuccessOnOne(),
+            children=[
+                Pause(seconds=seconds, node=self.node),
+                SynchronizePlannerPeriodic(node=self.node),
+            ],
+        )
         postpone_root = Sequence(
             name="postpone_root",
             memory=True,
             children=[
-                Pause(seconds=seconds, node=self.node),
+                pause_and_sync,
                 TriggerReplan(node=self.node, update_plan=True),
             ],
         )
@@ -123,7 +131,7 @@ class ExecutePlan(py_trees.behaviour.Behaviour):
         if self.node.state.plan.postpone_steps > 0:
             root.add_child(
                 self.create_postpone_tree(
-                    seconds=self.node.state.plan.postpone_steps * 0.3
+                    seconds=self.node.state.plan.postpone_steps * 0.5
                 )
             )
             return BehaviourTree(root)
@@ -182,9 +190,9 @@ class ExecutePlan(py_trees.behaviour.Behaviour):
         self.tree = self.create_sub_tree()
         snapshot_visitor = py_trees.visitors.DebugVisitor()
         self.tree.visitors.append(snapshot_visitor)
-        py_trees.display.render_dot_tree(
-            self.tree.root, name="execute_plan_tree", target_directory="."
-        )
+        # py_trees.display.render_dot_tree(
+        #     self.tree.root, name="execute_plan_tree", target_directory="."
+        # )
 
     def update(self):
         if not self.tree:
