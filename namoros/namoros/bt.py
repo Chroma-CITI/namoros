@@ -113,6 +113,8 @@ def main(args=None):
     py_trees.logging.level = py_trees.logging.Level.INFO
     executor = MultiThreadedExecutor()
     node = NamoBehaviorNode()
+    if node.is_sim:
+        node.wait_for_gazebo()
     executor.add_node(node)
     root = create_namo_tree(node=node)
     tree = BehaviourTree(root=root, unicode_tree_debug=False)

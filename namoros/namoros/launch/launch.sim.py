@@ -316,7 +316,6 @@ def namo_planner_bringup(context: t.Any, *args, **kwargs):  # type: ignore
         cmd=[
             "ign",
             "gazebo",
-            "-r",
             "--render-engine",
             "ogre",
             "-v",

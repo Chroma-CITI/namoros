@@ -51,12 +51,10 @@ import shapely.geometry as geom
 from shapely import affinity
 from namoros_msgs.srv import (
     AddOrUpdateMovableObstacle,
-    SimulatePath,
-    GetEntityPolygon,
     SynchronizeState,
     DetectConflicts,
 )
-from namoros_msgs.msg import NamoPath, NamoEntity, NamoConflict
+from namoros_msgs.msg import NamoEntity
 from namosim.world.world import World
 from namoros.world_state_tracker import WorldStateTracker
 from std_msgs.msg import Header
@@ -64,6 +62,7 @@ from visualization_msgs.msg import Marker
 from namosim.agents.stilman_2005_agent import Stilman2005Agent
 from namoros_msgs.action import ComputePlan
 from rclpy.clock import Clock
+from rosgraph_msgs.msg import Clock as ClockMsg
 
 
 class NamoState:
@@ -222,14 +221,14 @@ class NamoBehaviorNode(Node):
             # subscriptions
             self.obstacle_pose_subscriptions = {}
             for obstacle in self.namoros_config.obstacles:
-                self.obstacle_pose_subscriptions[obstacle.name] = (
-                    self.create_subscription(
-                        PoseArray,
-                        f"/model/{obstacle.name}/pose",
-                        self.create_obstacle_pose_callback(obstacle.name),
-                        1,
-                        callback_group=self.main_cb_group,
-                    )
+                self.obstacle_pose_subscriptions[
+                    obstacle.name
+                ] = self.create_subscription(
+                    PoseArray,
+                    f"/model/{obstacle.name}/pose",
+                    self.create_obstacle_pose_callback(obstacle.name),
+                    1,
+                    callback_group=self.main_cb_group,
                 )
 
         # publishers
@@ -320,9 +319,9 @@ class NamoBehaviorNode(Node):
 
         # Set covariance (example: low uncertainty)
         msg.pose.covariance = np.zeros(36)  # 6x6 matrix flattened
-        msg.pose.covariance[0] = variance_xy**2  # Variance in x
-        msg.pose.covariance[7] = variance_xy**2  # Variance in y
-        msg.pose.covariance[35] = variance_yaw**2  # Variance in yaw
+        msg.pose.covariance[0] = variance_xy ** 2  # Variance in x
+        msg.pose.covariance[7] = variance_xy ** 2  # Variance in y
+        msg.pose.covariance[35] = variance_yaw ** 2  # Variance in yaw
 
         self.pub_init_pose.publish(msg)
         self.get_logger().info(
@@ -337,6 +336,25 @@ class NamoBehaviorNode(Node):
 
     def reset(self):
         self.state.reset()
+
+    def wait_for_gazebo(self):
+        """Wait until Gazebo is running by checking the /clock topic."""
+        clock_received = False
+
+        def clock_callback(msg: ClockMsg):
+            nonlocal clock_received
+            if msg.clock.sec > 0:
+                clock_received = True
+            else:
+                self.get_logger().info("Waiting for simulation to start.")
+
+        sub = self.create_subscription(ClockMsg, "/clock", clock_callback, 10)
+        self.get_logger().info("Waiting for /clock topic...")
+
+        while not clock_received:
+            rclpy.spin_once(self, timeout_sec=1.0)
+
+        self.destroy_subscription(sub)
 
     def create_obstacle_pose_callback(self, obstacle_name: str):
         def cb(msg: PoseArray):
