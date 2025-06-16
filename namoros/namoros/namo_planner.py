@@ -284,9 +284,8 @@ class NamoPlanner:
                 robot_inflated_grid=self.agent.robot_inflated_grid,
                 grab_start_distance=self.agent.grab_start_distance,
                 rp=None,
-                check_horizon=self.agent.conflict_horizon,
-                exit_early_for_any_conflict=False,
-                apply_strict_horizon=False,
+                horizon=self.agent.conflict_horizon,
+                exit_early=False,
             )
         return set()
 

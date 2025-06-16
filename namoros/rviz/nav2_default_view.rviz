@@ -9,7 +9,6 @@ Panels:
         - /TF1/Tree1
         - /Map1
         - /Amcl Particle Swarm1
-        - /Amcl Particle Swarm1/Status1
         - /Global Planner1/Path1
         - /Controller1
         - /Controller1/Trajectories1
@@ -18,8 +17,8 @@ Panels:
         - /Current NAMO Path1
         - /Aruco Result1
         - /namosim1
-        - /namosim1/robot_0 manip search1
-        - /namosim1/Social Costmap1
+        - /namosim1/robot_1 manip search1
+        - /namosim1/robot_2 manip search1
         - /Namespace1
         - /Namespace1/Topic1
         - /Marker1
@@ -91,6 +90,10 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        aruco_marker_0:
+          Value: true
+        aruco_marker_300:
+          Value: true
         base_footprint:
           Value: true
         base_link:
@@ -189,7 +192,10 @@ Visualization Manager:
                 camera_link:
                   {}
                 camera_rgb_optical_frame:
-                  {}
+                  aruco_marker_0:
+                    {}
+                  aruco_marker_300:
+                    {}
               caster_back_link:
                 {}
               caster_front_link:
@@ -531,7 +537,8 @@ Visualization Manager:
           Enabled: true
           Name: Trajectories
           Namespaces:
-            {}
+            Candidate Trajectories: true
+            Optimal Trajectory: true
           Topic:
             Depth: 5
             Durability Policy: Volatile
@@ -757,6 +764,30 @@ Visualization Manager:
             Reliability Policy: Reliable
             Value: /namosim/robot_0/manip_search
           Value: true
+        - Class: rviz_default_plugins/MarkerArray
+          Enabled: true
+          Name: robot_1 manip search
+          Namespaces:
+            {}
+          Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /namosim/robot_1/manip_search
+          Value: true
+        - Class: rviz_default_plugins/MarkerArray
+          Enabled: true
+          Name: robot_2 manip search
+          Namespaces:
+            {}
+          Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /namosim/robot_2/manip_search
+          Value: true
         - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Class: grid_map_rviz_plugin/GridMap
@@ -865,7 +896,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 43.63493728637695
+      Scale: 54.107322692871094
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz_default_plugins)
       X: 0
