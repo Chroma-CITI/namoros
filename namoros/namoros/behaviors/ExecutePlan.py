@@ -175,7 +175,7 @@ class ExecutePlan(py_trees.behaviour.Behaviour):
             root.add_children([follow_path_seq])
 
             if namo_path.is_evasion:
-                root.add_child(TriggerReplan(node=self.node))
+                root.add_child(self.create_postpone_tree(seconds=10))
             if namo_path.is_transfer:
                 release = self.create_release_tree(
                     path_index=path_index + 1, path=namo_path

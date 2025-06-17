@@ -282,7 +282,7 @@ class NamoPlanner:
             return plan.get_conflicts(
                 world=self.world,
                 robot_inflated_grid=self.agent.robot_inflated_grid,
-                grab_start_distance=self.agent.grab_start_distance,
+                conflict_radius=self.agent.conflict_radius,
                 rp=None,
                 horizon=self.agent.conflict_horizon,
                 exit_early=False,

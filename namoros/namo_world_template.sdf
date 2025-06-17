@@ -32,7 +32,7 @@
     <plugin filename="libgz-sim-sensors-system" name="gz::sim::systems::Sensors">
       <render_engine>ogre2</render_engine>
     </plugin>
-    <gui fullscreen="0">
+    <gui fullscreen="1">
       <!-- 3D scene -->
       <plugin filename="GzScene3D" name="NAMO World">
         <gui>
@@ -53,7 +53,7 @@
           <title>World control</title>
           <property type="bool" key="showTitleBar">false</property>
           <property type="bool" key="resizable">true</property>
-          <property type="double" key="height">72</property>
+          <property type="double" key="height">36</property>
           <property type="double" key="width">121</property>
           <property type="double" key="z">1</property>
 

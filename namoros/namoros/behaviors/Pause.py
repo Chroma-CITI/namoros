@@ -18,8 +18,8 @@ class Pause(py_trees.behaviour.Behaviour):
         elapsed = time.time() - self.init_time
         self.node.get_logger().info(f"Pausing ({elapsed:.2f}/{self.seconds}).")
         if elapsed > self.seconds:
-            self.node.publish_status_marker(f"PAUSING ({elapsed:.2f}/{self.seconds}).")
             self.status = py_trees.common.Status.SUCCESS
         else:
+            self.node.publish_status_marker(f"PAUSING ({elapsed:.2f}/{self.seconds}).")
             self.status = py_trees.common.Status.RUNNING
         return self.status

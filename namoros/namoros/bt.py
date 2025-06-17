@@ -93,15 +93,31 @@ def create_namo_tree(node: NamoBehaviorNode) -> Behaviour:
             GoalSucceeded(node=node),
         ],
     )
+
+    init_sequence = Parallel(
+        name="init_and_sync",
+        policy=ParallelPolicy.SuccessOnOne(),
+        children=[
+            SynchronizePlannerPeriodic(node=node),
+            Sequence(
+                name="root",
+                memory=True,
+                children=[
+                    PlaySound(node=node, sound=Sound.ON),
+                    WaitForInitPose(node=node),
+                    PlaySound(node=node, sound=Sound.BUTTON),
+                    WaitForGoalPose(node=node),
+                    PlaySound(node=node, sound=Sound.BUTTON),
+                ],
+            ),
+        ],
+    )
+
     root = Sequence(
         name="root",
         memory=True,
         children=[
-            PlaySound(node=node, sound=Sound.ON),
-            WaitForInitPose(node=node),
-            PlaySound(node=node, sound=Sound.BUTTON),
-            WaitForGoalPose(node=node),
-            PlaySound(node=node, sound=Sound.BUTTON),
+            init_sequence,
             new_movable_and_main,
         ],
     )
