@@ -221,14 +221,14 @@ class NamoBehaviorNode(Node):
             # subscriptions
             self.obstacle_pose_subscriptions = {}
             for obstacle in self.namoros_config.obstacles:
-                self.obstacle_pose_subscriptions[obstacle.name] = (
-                    self.create_subscription(
-                        PoseArray,
-                        f"/model/{obstacle.name}/pose",
-                        self.create_obstacle_pose_callback(obstacle.name),
-                        1,
-                        callback_group=self.main_cb_group,
-                    )
+                self.obstacle_pose_subscriptions[
+                    obstacle.name
+                ] = self.create_subscription(
+                    PoseArray,
+                    f"/model/{obstacle.name}/pose",
+                    self.create_obstacle_pose_callback(obstacle.name),
+                    1,
+                    callback_group=self.main_cb_group,
                 )
 
         # publishers
@@ -319,9 +319,9 @@ class NamoBehaviorNode(Node):
 
         # Set covariance (example: low uncertainty)
         msg.pose.covariance = np.zeros(36)  # 6x6 matrix flattened
-        msg.pose.covariance[0] = variance_xy**2  # Variance in x
-        msg.pose.covariance[7] = variance_xy**2  # Variance in y
-        msg.pose.covariance[35] = variance_yaw**2  # Variance in yaw
+        msg.pose.covariance[0] = variance_xy ** 2  # Variance in x
+        msg.pose.covariance[7] = variance_xy ** 2  # Variance in y
+        msg.pose.covariance[35] = variance_yaw ** 2  # Variance in yaw
 
         self.pub_init_pose.publish(msg)
         self.get_logger().info(

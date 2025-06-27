@@ -1,5 +1,5 @@
 ---
-title: 'NAMOROS: ROS2 Nodes and Simulation Tools for Navigation Among Movable Obstacles'
+title: "NAMOROS: ROS2 Nodes and Simulation Tools for Navigation Among Movable Obstacles"
 authors:
   - name: David Brown
     orcid: TODO_ORCID
@@ -23,12 +23,11 @@ corresponding_author:
 
 repository: https://gitlab.inria.fr/chroma/namo/namoros
 archive: TODO_DOI
-
 ---
 
 # Summary
 
-NAMOROS is a set of ROS2 nodes and simulation tools for the problem of Navigation Among Movable Obstacles (NAMO). It enables mobile robots to plan and execute navigation tasks in environments where certain obstacles can be relocated. The project provides both simulation (via the `namosim` planner) and real-robot execution capabilities, supporting holonomic and differential drive robots. NAMOROS is designed for research and development in multi-robot navigation, path planning, and socially-aware navigation.
+NAMOROS is a set of ROS2 nodes and simulation tools for the problem of Navigation Among Movable Obstacles (NAMO). It enables mobile robots to plan and execute navigation tasks in environments where certain obstacles can be grasped and relocated. The project provides both simulation (via the `namosim` planner) and real-robot execution capabilities, supporting holonomic and differential drive robots. NAMOROS is designed for research and development in multi-robot navigation, path planning, and socially-aware navigation.
 
 # Statement of Need
 
@@ -37,6 +36,7 @@ Robotic navigation in dynamic and cluttered environments is a fundamental challe
 # Software Description
 
 NAMOROS consists of:
+
 - ROS2 nodes for computing and executing NAMO plans
 - Integration with the `namosim` planner for simulation
 - Support for holonomic and differential drive robots
@@ -47,57 +47,79 @@ NAMOROS consists of:
 ## Architecture
 
 The system is organized as ROS2 packages:
-- `namoros`: ROS2 nodes for plan execution and robot integration
-- `namosim`: Simulation and planning backend
-- `namoros_msgs`: Custom ROS2 message definitions
 
-The main behavior tree for the demo robot ticks at 2Hz and coordinates navigation, obstacle manipulation, and recovery behaviors.
+- `namoros`: ROS2 nodes to control the robot and interacting with the namosim planner within a behavior tree framework
+- `namosim`: The core planner for navigation and multi-robot coordination
+- `namoros_msgs`: Custom ROS2 message definitions
+- `namoros_gz`: Custom Gazebo plugin for simulating grab and release actions.
+
+Here is a block diagram showing the main components of NAMOROS:
+
+<img src="./static/NAMOROS_Architecture.png" width="1000" alt="NAMOROS Architecture">
+
+The **NAMO Planner** block is a custom ROS2 node that manages the namosim planner and exposes services and actions for interacting with it.
+
+The **NAMO Behavior Tree** block is another custom node that executes that main behavior tree which controls the robot execution and interaction with the planner node.
+
+The other blocks, `nav2` and `aruco_markers` are third-party packages used for simple navigation and detection of visual markers placed on movable obstacles.
+
+If running in a Gazebo simulation, a plugin from the `namoros_gz` package is provided to simulate grab and release actions. It works by dynamically creating a fixed joint between a user-chosen link on the robot and a link on the obstacle.
 
 ### Main Behavior Tree
+
+The main behavior tree is illustrated in the following diagram. It ticks at a frequency of 2Hz. The robot starts by waiting to receive a start pose and goal pose. These may come from the scenario file or be published to the corresponding topics. The behavior tree continuously motors its sensor data for the positions of other robots and movable obstacles. It uses this data during specific periods to synchronize the planner node's state with the estimated state of the environment which is necessary for conflict detection. The _New Movable_ node encapsulates a subtree that handles dynamic detection of movable obstacles but is only used when that feature is activated and not shown for brevity.
 
 <img src="./static/namo_main_tree.svg" width="1000" alt="Main Behavior Tree">
 
 ### Execute Plan Subtree
 
+Because a NAMO plan consists of multiple behaviors such as path following, and grabbing and releasing obstacles, and because the plan is initially unknown and subject to change, the _Execute Plan_ bevavior dynamically creates and executes a subtree corresponding to the current plan. The following diagram shows an example subtree which consists of a _transit_ path followed by a _transfer_ path to move an obstacle, and lastly another transit path to reach the goal. Immediately before and after each _transfer_ path there are also grab and release sequences. Each of these behaviors are themselves small subtrees which are illustrated below. The _Execute Plan_ subtree always starts with a release behavior to just in case the robot was already holding an obstacle at the time the plan was computed.
+
 <img src="./static/execute_plan_tree.svg" width="1000" alt="Execute Plan Tree">
 
-### Transit Path Sequence
+### Transit Path
+
+The transit path uses nav2 to follow the corresponding path segment within the NAMO plan.
 
 <img src="./static/transit_path_tree.svg" width="600" alt="Transit Path Tree">
 
 ### Grab Sequence
 
+The grab sequence consists of first turning towards the obstacle, approaching it within close range as determined by the lidar sensor, and finally performing the grab action.
+
 <img src="./static/grab_tree.svg" width="700" alt="Grab Tree">
 
 ### Release Sequence
 
+The release sequence first performs the release action, and the backs the robot up at a constant slow speed for a fixed time period. Then the robot re-estimates the obstacle position, synchronizes the planner, and re-computes the plan.
+
 ![Release Sequence\label{fig:release}](./static/release_tree.svg){width="500px" style="display: block; margin: 0 auto"}
 
-## Usage
+## Conflict Handling
 
-### Simulation Demo
-
-```bash
-colcon build
-source install/setup.bash
-./namoros/launch_demo.sh
-```
-
-### Real Robot
-
-Prepare the map image, YAML files, and NAMO configuration. See the demo script and documentation for details.
-
-## Dependencies
-
-- Ubuntu 22.04
-- ROS2 Humble
-- Python 3
-- Key Python dependencies: numpy, typer, jinja2, transforms3d, pytest, keyboard, aabbtree, bidict, cairosvg, jsonpickle, matplotlib, numpy-stl, opencv-python-headless, pandas, pillow, pydantic, shapely, torch, torchvision, transformers, triangle, wandb
-- ROS2 packages: geometry_msgs, grid_map, nav_msgs, navigation2, py_trees, rclpy, robot_state_publisher, rviz2, xacro, etc.
+During path following, the behavior tree periodically synchronizes the planner node with the current estimated state of the environment and checks for conflicts. When a conflict is detected, the robot is interrupted, the plan is _updated_, and then plan execution is restarted.
 
 # Acknowledgements
 
 This work is supported by Inria, INSA Lyon, CITI Laboratory, and the CHROMA Team. We thank all contributors and users of the project.
+
+## Authors
+
+- David Brown
+- Jacques Saraydaryan
+- Olivier Simonin
+- Benoit Renault
+
+## Acknowledgements
+
+This work was completed in affiliation with the following teams and organisations.
+
+|                                    | Org/Team                                      |
+| ---------------------------------- | --------------------------------------------- |
+| ![Inria Logo](static/inria.png)    | [Inria](https://inria.fr/fr)                  |
+| ![INSA Lyon Logo](static/insa.png) | [INSA Lyon](https://www.insa-lyon.fr/)        |
+| ![CITI Logo](static/citi.png)      | [CITI Laboratory](https://www.citi-lab.fr/)   |
+| CHROMA                             | [CHROMA Team](https://www.inria.fr/en/chroma) |
 
 # References
 
@@ -142,4 +164,4 @@ If you reuse any of the provided data/code, please cite the associated papers:
 
 # License
 
-This work is licensed under the MIT License. 
+This work is licensed under the MIT License.

@@ -190,9 +190,9 @@ class ExecutePlan(py_trees.behaviour.Behaviour):
         self.tree = self.create_sub_tree()
         snapshot_visitor = py_trees.visitors.DebugVisitor()
         self.tree.visitors.append(snapshot_visitor)
-        # py_trees.display.render_dot_tree(
-        #     self.tree.root, name="execute_plan_tree", target_directory="."
-        # )
+        py_trees.display.render_dot_tree(
+            self.tree.root, name="execute_plan_tree", target_directory="."
+        )
 
     def update(self):
         if not self.tree:

@@ -49,7 +49,7 @@ In order to launch a simulation demonstration a robot that makes use of namoros 
 
 ### Main Behavior Tree
 
-The simulated demo robot for namoros makes use of the following behavior tree. This tree ticks at a rate of 2Hz. 
+The simulated demo robot for namoros makes use of the following behavior tree. This tree ticks at a rate of 2Hz.
 
 ![Main Behavior Tree](static/namo_main_tree.svg)
 
@@ -62,12 +62,12 @@ The simulated demo robot for namoros makes use of the following behavior tree. T
 
 ## Affiliated Teams and Organisations
 
-|                                                 | Org/Team                                      |
-| ----------------------------------------------- | --------------------------------------------- |
-| ![Inria Logo](docs/source/_static/inria.png)    | [Inria](https://inria.fr/fr)                  |
-| ![INSA Lyon Logo](docs/source/_static/insa.png) | [INSA Lyon](https://www.insa-lyon.fr/)        |
-| ![CITI Logo](docs/source/_static/citi.png)      | [CITI Laboratory](https://www.citi-lab.fr/)   |
-| CHROMA                                          | [CHROMA Team](https://www.inria.fr/en/chroma) |
+|                                    | Org/Team                                      |
+| ---------------------------------- | --------------------------------------------- |
+| ![Inria Logo](static/inria.png)    | [Inria](https://inria.fr/fr)                  |
+| ![INSA Lyon Logo](static/insa.png) | [INSA Lyon](https://www.insa-lyon.fr/)        |
+| ![CITI Logo](static/citi.png)      | [CITI Laboratory](https://www.citi-lab.fr/)   |
+| CHROMA                             | [CHROMA Team](https://www.inria.fr/en/chroma) |
 
 ## Cite Us
 
