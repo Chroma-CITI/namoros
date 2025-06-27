@@ -27,7 +27,7 @@ archive: TODO_DOI
 
 # Summary
 
-NAMOROS is a set of ROS2 nodes and simulation tools for the problem of Navigation Among Movable Obstacles (NAMO). It enables mobile robots to plan and execute navigation tasks in environments where certain obstacles can be grasped and relocated. The project provides both simulation (via the `namosim` planner) and real-robot execution capabilities, supporting holonomic and differential drive robots. NAMOROS is designed for research and development in multi-robot navigation, path planning, and socially-aware navigation.
+NAMOROS is a set of ROS2 nodes and simulation tools for the problem of Navigation Among Movable Obstacles (NAMO). It enables mobile robots to plan and execute navigation tasks in environments where certain obstacles can be grasped and relocated. The project provides tools for  simulation via [Gazebo Sim](https://gazebosim.org/home) and real-robot execution capabilities, supporting holonomic and differential drive robots. NAMOROS is designed for research and development in multi-robot navigation, path planning, and socially-aware navigation.
 
 # Statement of Need
 
@@ -55,7 +55,7 @@ The system is organized as ROS2 packages:
 
 Here is a block diagram showing the main components of NAMOROS:
 
-<img src="./static/NAMOROS_Architecture.png" width="1000" alt="NAMOROS Architecture">
+![NAMOROS Architecturelabel{fig:archi}](./static/NAMOROS_Architecture.png){style="display: block; margin: 0 auto"}
 
 The **NAMO Planner** block is a custom ROS2 node that manages the namosim planner and exposes services and actions for interacting with it.
 
@@ -69,31 +69,32 @@ If running in a Gazebo simulation, a plugin from the `namoros_gz` package is pro
 
 The main behavior tree is illustrated in the following diagram. It ticks at a frequency of 2Hz. The robot starts by waiting to receive a start pose and goal pose. These may come from the scenario file or be published to the corresponding topics. The behavior tree continuously motors its sensor data for the positions of other robots and movable obstacles. It uses this data during specific periods to synchronize the planner node's state with the estimated state of the environment which is necessary for conflict detection. The _New Movable_ node encapsulates a subtree that handles dynamic detection of movable obstacles but is only used when that feature is activated and not shown for brevity.
 
-<img src="./static/namo_main_tree.svg" width="1000" alt="Main Behavior Tree">
+![Main Behavior Tree\label{fig:main_tree}](./static/namo_main_tree.svg){style="display: block; margin: 0 auto"}
 
 ### Execute Plan Subtree
 
 Because a NAMO plan consists of multiple behaviors such as path following, and grabbing and releasing obstacles, and because the plan is initially unknown and subject to change, the _Execute Plan_ bevavior dynamically creates and executes a subtree corresponding to the current plan. The following diagram shows an example subtree which consists of a _transit_ path followed by a _transfer_ path to move an obstacle, and lastly another transit path to reach the goal. Immediately before and after each _transfer_ path there are also grab and release sequences. Each of these behaviors are themselves small subtrees which are illustrated below. The _Execute Plan_ subtree always starts with a release behavior to just in case the robot was already holding an obstacle at the time the plan was computed.
 
-<img src="./static/execute_plan_tree.svg" width="1000" alt="Execute Plan Tree">
+![Execute Plan Tree\label{fig:execute_plan}](./static/execute_plan_tree.svg){style="display: block; margin: 0 auto"}
 
 ### Transit Path
 
 The transit path uses nav2 to follow the corresponding path segment within the NAMO plan.
 
-<img src="./static/transit_path_tree.svg" width="600" alt="Transit Path Tree">
+![Transit Path Tree\label{fig:transit}](./static/transit_path_tree.svg){style="display: block; margin: 0 auto"}
 
 ### Grab Sequence
 
-The grab sequence consists of first turning towards the obstacle, approaching it within close range as determined by the lidar sensor, and finally performing the grab action.
+The grab sequence consists of first turning towards the obstacle, approaching it within close range as determined by the lidar sensor, and finally performing the grab action. An important point is that synchronizing the planner with the observed obstacle state is disabled
+because the planner treats robot and the obstacle as a single object during transfer paths. Otherwise, the planner will detect conflicts with the obstacle the robot is already carrying.
 
-<img src="./static/grab_tree.svg" width="700" alt="Grab Tree">
+![Grab Sequence\label{fig:grab}](./static/grab_tree.svg){style="display: block; margin: 0 auto"}
 
 ### Release Sequence
 
 The release sequence first performs the release action, and the backs the robot up at a constant slow speed for a fixed time period. Then the robot re-estimates the obstacle position, synchronizes the planner, and re-computes the plan.
 
-![Release Sequence\label{fig:release}](./static/release_tree.svg){width="500px" style="display: block; margin: 0 auto"}
+![Release Sequence\label{fig:release}](./static/release_tree.svg){style="display: block; margin: 0 auto"}
 
 ## Conflict Handling
 

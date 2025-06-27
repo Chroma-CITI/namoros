@@ -5,3 +5,5 @@ log
 .pytest_cache
 *.prof
 map_walls.stl
+jats/
+paper.pdf
