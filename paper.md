@@ -104,14 +104,14 @@ During path following, the behavior tree periodically synchronizes the planner n
 
 This work is supported by Inria, INSA Lyon, CITI Laboratory, and the CHROMA Team. We thank all contributors and users of the project.
 
-## Authors
+# Authors
 
 - David Brown
 - Jacques Saraydaryan
 - Olivier Simonin
 - Benoit Renault
 
-## Acknowledgements
+# Acknowledgements
 
 This work was completed in affiliation with the following teams and organisations.
 
