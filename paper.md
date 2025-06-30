@@ -10,9 +10,6 @@ authors:
   - name: Olivier Simonin
     orcid: TODO_ORCID
     affiliation: 1
-  - name: Benoit Renault
-    orcid: TODO_ORCID
-    affiliation: 1
 
 affiliations:
   - name: Inria, INSA Lyon, CITI Laboratory, CHROMA Team
