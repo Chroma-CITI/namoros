@@ -1,5 +1,5 @@
 ---
-title: "NAMOROS: ROS2 Nodes and Simulation Tools for Navigation Among Movable Obstacles"
+title: "NAMOROS: ROS2 Nodes and Simulation Tools for Multi-Robot Navigation Among Movable Obstacles"
 authors:
   - name: David Brown
     orcid: TODO_ORCID
