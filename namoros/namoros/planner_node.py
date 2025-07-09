@@ -286,9 +286,9 @@ class PlannerNode(Node):
                     assert isinstance(path, TransferPath)
 
                     if path.action_index > 0:
-                        self.namo_planner.world.entity_to_agent[
-                            path.obstacle_uid
-                        ] = self.agent_id
+                        self.namo_planner.world.entity_to_agent[path.obstacle_uid] = (
+                            self.agent_id
+                        )
 
                     obstacle_pose = path.obstacle_path.poses[path.action_index]
                     self.namo_planner.reset_obstacle_pose(
