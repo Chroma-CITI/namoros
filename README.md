@@ -56,7 +56,7 @@ The system is organized as ROS2 packages:
 
 Here is a block diagram showing the main components of NAMOROS:
 
-<img src="static/NAMOROS_Architecture.png" alt="NAMOROS Architecturelabel">
+<img src="static/NAMOROS_Architecture.png" alt="NAMOROS Architecturelabel" width="1000">
 
 The **NAMO Planner** block is a custom ROS2 node that manages the namosim planner and exposes services and actions for interacting with it.
 
