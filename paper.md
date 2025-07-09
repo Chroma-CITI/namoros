@@ -1,20 +1,24 @@
 ---
-title: "NAMOROS: ROS2 Nodes and Simulation Tools for Multi-Robot Navigation Among Movable Obstacles"
+title: "NAMOROS: A ROS-Compatible Framework for Multi-Robot Navigation Among Movable Obstacles"
 authors:
   - name: David Brown
-    orcid: TODO_ORCID
-    affiliation: 1
+    orcid: 0000-000X-XXXX-XXXX # Replace with actual ORCID
+    affiliation: "1 4"
   - name: Jacques Saraydaryan
-    orcid: TODO_ORCID
-    affiliation: 1
+    orcid: 0000-000X-XXXX-XXXX # Replace with actual ORCID
+    affiliation: "1 3 4"
   - name: Olivier Simonin
-    orcid: TODO_ORCID
-    affiliation: 1
-
+    orcid: 0000-000X-XXXX-XXXX # Replace with actual ORCID
+    affiliation: "1 2 4"
 affiliations:
-  - name: Inria, INSA Lyon, CITI Laboratory, CHROMA Team
+  - name: Inria, CHROMA Team
     index: 1
-
+  - name: INSA Lyon
+    index: 2
+  - name: CPE Lyon
+    index: 3
+  - name: CITI Laboratory
+    index: 4
 corresponding_author:
   email: david.brown@inria.fr
 
@@ -24,11 +28,13 @@ archive: TODO_DOI
 
 # Summary
 
-NAMOROS is a set of ROS2 nodes and simulation tools for the problem of Navigation Among Movable Obstacles (NAMO). It enables mobile robots to plan and execute navigation tasks in environments where certain obstacles can be grasped and relocated. The project provides tools for  simulation via [Gazebo Sim](https://gazebosim.org/home) and real-robot execution capabilities, supporting holonomic and differential drive robots. NAMOROS is designed for research and development in multi-robot navigation, path planning, and socially-aware navigation.
+NAMOROS is a set of ROS2 nodes and simulation tools for the problem of Navigation Among Movable Obstacles (NAMO). It enables mobile robots to plan and execute navigation tasks in environments where certain obstacles can be grasped and relocated. The package integrates seamlessly with [Gazebo Sim](https://gazebosim.org/home) and any ROS2-compatible mobile robot platform such as Turtlebot, supporting holonomic and differential drive motion models. NAMOROS is designed for research and development in multi-robot navigation, path planning, and socially-aware navigation.
 
 # Statement of Need
 
-Robotic navigation in dynamic and cluttered environments is a fundamental challenge in robotics. Traditional navigation approaches assume static obstacles, but many real-world scenarios require robots to interact with and move obstacles to achieve their goals. NAMOROS addresses this gap by providing open-source tools for NAMO, supporting both simulation and real-world deployment, and enabling reproducible research in this area.
+Robotic navigation in dynamic and cluttered environments remains a critical challenge in robotics. Traditional navigation methods typically assume static obstacles, but many real-world applications require robots to actively interact with and manipulate obstacles to achieve their objectives. NAMOROS takes a significant first step toward addressing this challenge by providing open-source tools for Navigation Among Movable Obstacles (NAMO), thus enabling reproducible research in and practical deployment of NAMO algorithms on real robotic systems.
+
+In addition to single-robot navigation, NAMOROS provides important multi-robot conflict avoidance and deadlock resolution capabilities. It continuously updates the planner with the current state of the environment, detects conflicts between robots, and makes coordinated decisions to resolve them. This makes it particularly suitable for multi-robot systems operating in shared, dynamic spaces, where reactive and adaptive behavior is essential for robust operation.
 
 # Software Description
 
