@@ -47,6 +47,22 @@ NAMOROS consists of:
 - Tools for visualization (RViz), scenario creation, and benchmarking
 - Example scripts and demonstration scenarios
 
+## Key Features
+
+NAMOROS provides the following key features:
+
+- **Full ROS2 Compatibility**: Includes modular ROS2 nodes for planning and execution.
+- **Multi-Robot Support**: Handles simultaneous navigation and coordination of multiple robots, including conflict and deadlock resolution.
+- **Movable Obstacle Interaction**: Enables grasping, relocating, and releasing of obstacles during navigation.
+- **Dynamic Replanning**: Continuously updates plans based on real-time sensor data and robot interactions.
+- **Simulation Integration**: Seamlessly integrates with Gazebo Sim for physics-based validation.
+- **Support for Multiple Locomotion Models**: Compatible with both holonomic and differential-drive robots.
+- **Behavior Tree Architecture**: Modular, extensible control logic implemented with behavior trees.
+- **Custom Planning Backend**: Interfaces with `namosim`, a dedicated NAMO planner with multi-robot awareness.
+- **Extensive Visualization Tools**: Includes support for RViz and custom visualization markers.
+- **Scenario and Benchmarking Tools**: Offers utilities for reproducible experiments and comparative evaluation.
+- **Custom Gazebo Plugins**: Includes plugins to simulate physical interactions like grabbing and releasing obstacles.
+
 ## Architecture
 
 The system is organized as ROS2 packages:
