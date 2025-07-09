@@ -70,19 +70,19 @@ If running in a Gazebo simulation, a plugin from the `namoros_gz` package is pro
 
 The main behavior tree is illustrated in the following diagram. It ticks at a frequency of 2Hz. The robot starts by waiting to receive a start pose and goal pose. These may come from the scenario file or be published to the corresponding topics. The behavior tree continuously motors its sensor data for the positions of other robots and movable obstacles. It uses this data during specific periods to synchronize the planner node's state with the estimated state of the environment which is necessary for conflict detection. The _New Movable_ node encapsulates a subtree that handles dynamic detection of movable obstacles but is only used when that feature is activated and not shown for brevity.
 
-<img src="static/namo_main_tree.svg" alt="Main Behavior Tree">
+<img src="static/namo_main_tree.svg" alt="Main Behavior Tree" width="900">
 
 ### Execute Plan Subtree
 
 Because a NAMO plan consists of multiple behaviors such as path following, and grabbing and releasing obstacles, and because the plan is initially unknown and subject to change, the _Execute Plan_ bevavior dynamically creates and executes a subtree corresponding to the current plan. The following diagram shows an example subtree which consists of a _transit_ path followed by a _transfer_ path to move an obstacle, and lastly another transit path to reach the goal. Immediately before and after each _transfer_ path there are also grab and release sequences. Each of these behaviors are themselves small subtrees which are illustrated below. The _Execute Plan_ subtree always starts with a release behavior to just in case the robot was already holding an obstacle at the time the plan was computed.
 
-<img src="static/execute_plan_tree.svg" alt="Execute Plan Tree" width="800">
+<img src="static/execute_plan_tree.svg" alt="Execute Plan Tree" width="900">
 
 ### Transit Path
 
 The transit path uses nav2 to follow the corresponding path segment within the NAMO plan.
 
-<img src="static/transit_path_tree.svg" alt="Transit Path Tree" width="700">
+<img src="static/transit_path_tree.svg" alt="Transit Path Tree" width="600">
 
 ### Grab Sequence
 
@@ -95,7 +95,7 @@ because the planner treats robot and the obstacle as a single object during tran
 
 The release sequence first performs the release action, and the backs the robot up at a constant slow speed for a fixed time period. Then the robot re-estimates the obstacle position, synchronizes the planner, and re-computes the plan.
 
-<img src="static/release_tree.svg" alt="Release Tree" width="700">
+<img src="static/release_tree.svg" alt="Release Tree" width="600">
 
 ## Conflict Handling
 
