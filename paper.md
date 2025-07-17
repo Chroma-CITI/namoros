@@ -28,7 +28,7 @@ archive: TODO_DOI
 
 # Summary
 
-NAMOROS is a ROS2 package for the problem of Navigation Among Movable Obstacles (NAMO). It enables mobile robots to plan and execute navigation tasks in environments where certain obstacles can be grasped and relocated.  Additioanlly, it supports environments with multiple robots by dynamically detecting and reacting to conflicts via a communicationf-free coordination strategy. The package integrates seamlessly with [Gazebo Sim](https://gazebosim.org/home) and any ROS2-compatible mobile robot platform such as Turtlebot, supporting holonomic and differential-drive motion models. NAMOROS is designed for research and development in multi-robot navigation, path planning, and socially-aware navigation.
+NAMOROS is a ROS2 package for the problem of Navigation Among Movable Obstacles (NAMO). It enables mobile robots to plan and execute navigation tasks in environments where certain obstacles can be grasped and relocated. NAMOROS encapsulates the NAMOSIM navigation planner in a ROS2 framework to facilite the execution of NAMO plans on real and simulated robots. The package also supports environments with multiple robots and provides ROS2 services and actions to synchronize the planner state and dynamically detect and react to conflicts via NAMOSIM's communication-free coordination strategy. The package integrates seamlessly with [Gazebo Sim](https://gazebosim.org/home) and any ROS2-compatible mobile robot platform such as Turtlebot, and supports holonomic and differential-drive motion models. NAMOROS is designed for research and development in multi-robot navigation, path planning, and socially-aware navigation, particularly in interactive environments.
 
 # Statement of Need
 
@@ -122,14 +122,12 @@ This work was completed in affiliation with the following teams and organisation
 | ![CITI Logo](static/citi.png)      | [CITI Laboratory](https://www.citi-lab.fr/)   |
 | CHROMA                             | [CHROMA Team](https://www.inria.fr/en/chroma) |
 
-
 # License
 
 This work is licensed under the MIT License.
 
-
 # References
 
-Renault, B., Saraydaryan, J., Brown, D., & Simonin, O. (2024). Multi-Robot Navigation among Movable Obstacles: Implicit Coordination to Deal with Conflicts and Deadlocks. *IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)*. https://hal.science/hal-04705395
+Renault, B., Saraydaryan, J., Brown, D., & Simonin, O. (2024). Multi-Robot Navigation among Movable Obstacles: Implicit Coordination to Deal with Conflicts and Deadlocks. _IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)_. https://hal.science/hal-04705395
 
-Renault, B., Saraydaryan, J., & Simonin, O. (2020). Modeling a Social Placement Cost to Extend Navigation Among Movable Obstacles (NAMO) Algorithms. *IEEE/RSJ IROS 2020*. https://doi.org/10.1109/IROS45743.2020.9340892
+Renault, B., Saraydaryan, J., & Simonin, O. (2020). Modeling a Social Placement Cost to Extend Navigation Among Movable Obstacles (NAMO) Algorithms. _IEEE/RSJ IROS 2020_. https://doi.org/10.1109/IROS45743.2020.9340892
