@@ -28,7 +28,7 @@ archive: TODO_DOI
 
 # Summary
 
-NAMOROS is a ROS2 package for the problem of Navigation Among Movable Obstacles (NAMO). It enables mobile robots to plan and execute navigation tasks in environments where certain obstacles can be grasped and relocated. NAMOROS encapsulates the NAMOSIM navigation planner in a ROS2 framework to facilite the execution of NAMO plans on real and simulated robots. The package also supports environments with multiple robots and provides ROS2 services and actions to synchronize the planner state and dynamically detect and react to conflicts via NAMOSIM's communication-free coordination strategy. The package integrates seamlessly with [Gazebo Sim](https://gazebosim.org/home) and any ROS2-compatible mobile robot platform such as Turtlebot, and supports holonomic and differential-drive motion models. NAMOROS is designed for research and development in multi-robot navigation, path planning, and socially-aware navigation, particularly in interactive environments.
+NAMOROS is a ROS2 package for the problem of Navigation Among Movable Obstacles (NAMO). It enables mobile robots to plan and execute navigation tasks in environments where certain obstacles can be grasped and relocated. NAMOROS encapsulates the NAMOSIM (Renault 2020) navigation planner in a ROS2 framework to facilite the execution of NAMO plans on real and simulated robots. The package also supports environments with multiple robots and provides ROS2 services and actions to synchronize the planner state and dynamically detect and react to conflicts via NAMOSIM's communication-free coordination strategy. The package integrates seamlessly with [Gazebo Sim](https://gazebosim.org/home) and any ROS2-compatible mobile robot platform such as Turtlebot, and supports holonomic and differential-drive motion models. NAMOROS is designed for research and development in multi-robot navigation, path planning, and socially-aware navigation, particularly in interactive environments.
 
 # Statement of Need
 
@@ -86,7 +86,9 @@ If running in a Gazebo simulation, a plugin from the `namoros_gz` package is pro
 
 ### Main Behavior Tree
 
-The main behavior tree is illustrated in the following diagram. It ticks at a frequency of 2Hz. The robot starts by waiting to receive a start pose and goal pose. These may come from the scenario file or be published to the corresponding topics. The behavior tree continuously monitors its sensor data for the positions of other robots and movable obstacles. It uses this data during specific periods to synchronize the planner node's state with the estimated state of the environment, which is necessary for conflict detection. The _New Movable_ node encapsulates a subtree that handles dynamic detection of movable obstacles but is only used when that feature is activated and not shown for brevity.
+NAMOROS provides a behavior tree to run NAMO plans on a real or simulated robot. This behavior tree controls the robot while managing sensor data and interactions with the planner node. The tree is illustrated in the following diagram and is configured to tick at a frequency of 2Hz. The robot starts by waiting to receive a start pose and a goal pose. These may come from the scenario file or be published to the corresponding ROS2 topics.
+
+The behavior tree continuously monitors the robot's sensor data to track the positions of other robots and movable obstacles. It uses this data during specific periods to synchronize the planner node's state with the estimated state of the environment, which is necessary for conflict detection. The _New Movable_ node encapsulates a subtree that handles dynamic detection of movable obstacles but is only used when that feature is activated and is not illustrated for brevity.
 
 ![Main Behavior Tree\label{fig:main_tree}](./static/namo_main_tree.svg){style="display: block; margin: 0 auto"}
 
@@ -96,31 +98,13 @@ Because a NAMO plan consists of multiple behaviors such as path following, and g
 
 ![Execute Plan Tree\label{fig:execute_plan}](./static/execute_plan_tree.svg){style="display: block; margin: 0 auto"}
 
-## Conflict Handling
+## Conflict Avoidance and Deadlock Resolution
 
-During path following, the behavior tree periodically synchronizes the planner node with the current estimated state of the environment and checks for conflicts. When a conflict is detected, the robot is interrupted, the plan is _updated_, and then plan execution is restarted. The conflict resolution strategies implemented in NAMOROS build on earlier work in implicit coordination for multi-robot NAMO scenarios [Renault et al., 2024].
-
-# Acknowledgements
-
-This work is supported by Inria, INSA Lyon, CITI Laboratory, and the CHROMA Team. We thank all contributors and users of the project.
-
-# Authors
-
-- David Brown
-- Jacques Saraydaryan
-- Olivier Simonin
-- Benoit Renault
+Detecting and handling conflicts relies on implicit-coordination strategy implemented in NAMOSIM's `Stilman2005` agent. However, it depends on keeping the planner synchronized with the robot's current perceived state. During path following, the behavior tree periodically synchronizes the planner node with the current estimated state of the environment and checks for conflicts. When a conflict is detected, the robot is interrupted, the planner node is manually synchronized with the robot's current perceived state, the plan is _updated_, and finally plan execution is restarted. The deadlock resolution strategies likewise depend on the coordination algorithm from the `Stilman2005` agent in NAMOSIM.
 
 # Acknowledgements
 
-This work was completed in affiliation with the following teams and organisations.
-
-|                                    | Org/Team                                      |
-| ---------------------------------- | --------------------------------------------- |
-| ![Inria Logo](static/inria.png)    | [Inria](https://inria.fr/fr)                  |
-| ![INSA Lyon Logo](static/insa.png) | [INSA Lyon](https://www.insa-lyon.fr/)        |
-| ![CITI Logo](static/citi.png)      | [CITI Laboratory](https://www.citi-lab.fr/)   |
-| CHROMA                             | [CHROMA Team](https://www.inria.fr/en/chroma) |
+This research was supported by an Inria ADT initiative. We express our gratitude to Benoit Renault, whose PhD thesis forms the foundation of this work.
 
 # License
 
