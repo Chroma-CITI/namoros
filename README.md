@@ -101,6 +101,52 @@ The release sequence first performs the release action, and the backs the robot 
 
 During path following, the behavior tree periodically synchronizes the planner node with the current estimated state of the environment and checks for conflicts. When a conflict is detected, the robot is interrupted, the plan is _updated_, and then plan execution is restarted.
 
+## Architecture Component Diagram
+
+```mermaid
+---
+config:
+  theme: default
+---
+C4Component
+    title Component Diagram for NAMOROS
+    Container_Boundary(namoros, "NAMOROS") {
+        Component(planner, "NAMO Planner Node", "Python", "Computes and updates NAMO plan. Tracks environment state.")
+        Component(bt, "NAMO Behavior Tree", "Python", "Executes the NAMO plans. Fuses sensor data.")
+        Container_Boundary(planner_container, "NAMO Planner Node") {
+            Component(planner, "NAMO Planner", "ROS 2 Python Node", "")
+            Component(namosim, "NAMOSIM", "Python Module", "")
+            Rel(planner, namosim, "", "")
+        }
+    }
+    Container_Boundary(gz_container, "Real or Simulated Robot") {
+        Component(gz, "Gazebo", "", "")
+        Component(namo_plugin, "NAMO GZ Plugin", "", "")
+        Component(robot, "Physical Robot", "", "")
+        Rel(gz, namo_plugin, "", "")
+        Rel(namo_plugin, gz, "", "")
+    }
+    Component(nav2, "Nav2", "", "Mobile robot navigation")
+    Component(aruco, "aruco_markers", "", "Detects aruco tags")
+    Component(bridge, "ROS GZ Bridge", "", "")
+    Component(rviz, "RViz", "", "")
+    Rel(bt, nav2, "", "")
+    Rel(bt, aruco, "", "")
+    Rel(bt, rviz, "", "")
+    Rel(bt, bridge, "", "")
+    Rel(bt, planner, "", "")
+    Rel(bt, robot, "", "")
+    Rel(planner, rviz, "", "")
+    Rel(planner, bridge, "", "")
+    Rel(bridge, gz, "", "")
+    Rel(bridge, namo_plugin, "", "")
+    Rel(nav2, bridge, "", "")
+    Rel(nav2, robot, "", "")
+    Rel(nav2, rviz, "", "")
+UpdateRelStyle(nav2, bridge, $offsetY="40")
+UpdateRelStyle(nav2, bridge, $textColor="red")
+```
+
 ## Authors
 
 - David Brown
