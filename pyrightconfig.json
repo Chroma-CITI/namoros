@@ -17,7 +17,7 @@
     {
       "root": "./namoros",
       "extraPaths": [
-        "./namosim",
+        "./namosim/namosim",
         "./install/namoros_msgs/local/lib/python3.10/dist-packages"
       ]
     }

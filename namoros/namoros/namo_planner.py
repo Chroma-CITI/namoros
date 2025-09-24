@@ -269,7 +269,7 @@ class NamoPlanner:
         think_result = self.agent.think(ros_publisher=self.ros_publisher)
         plan = think_result.plan
 
-        if plan:
+        if plan is not None:
             self.ros_publisher.publish_robot_plan(plan, self.agent, map=self.world.map)
             self.logger.info(f"Updated namo plan: {plan.paths}")
             plan_msg = plan_to_msg(plan, header)
