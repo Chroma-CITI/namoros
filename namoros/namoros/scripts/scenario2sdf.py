@@ -103,7 +103,7 @@ def run(
     width_in_pixels = int(width_in_meters / world.map.cell_size)
 
     mesh = svg_to_mesh(svg_file, wall_height_meters=1.0)
-    mesh.save(os.path.join(out_dir, "map_walls.stl"))
+    mesh.save(os.path.join(out_dir, f"{basename}.stl"))
 
     img_name = f"{basename}.png"
     img_path = os.path.join(out_dir, img_name)
@@ -137,10 +137,14 @@ def run(
             )
         if entity.type_ == "robot":
             robots.append({"name": entity.uid, "pose": f"{x} {y} 1 0 0 {theta}"})
-    context = {"movable_boxes": movable_boxes, "robots": robots}
+    context = {
+        "movable_boxes": movable_boxes,
+        "robots": robots,
+        "walls_mesh": f"{basename}.stl",
+    }
     print(context)
 
-    with open(os.path.join(out_dir, "namo_world.sdf"), "w") as f:
+    with open(os.path.join(out_dir, f"{basename}.sdf"), "w") as f:
         pkg_share = get_package_share_directory("namoros")
         result = process_template(
             os.path.join(pkg_share, "namo_world_template.sdf"), context

@@ -1,5 +1,5 @@
 ---
-title: "NAMOROS: a ROS2 Package for Multi-Robot Navigation Among Movable Obstacles"
+title: "NAMOROS: a ROS 2 Package for Multi-Robot Navigation Among Movable Obstacles"
 authors:
   - name: David Brown
     orcid: 0009-0000-3804-7734
@@ -28,11 +28,11 @@ archive: TODO_DOI
 
 # Summary
 
-NAMOROS is a ROS2 package addressing the problem of **N**avigation **A**mong **M**ovable **O**bstacles (NAMO). It enables mobile robots to plan and execute navigation tasks in environments where certain obstacles can be grasped and relocated. NAMOROS encapsulates our NAMOSIM [@renault_phd_thesis; @renault_2024_iros; @renault_2020_iros] motion planner in a ROS2 framework to facilite the execution of NAMO plans on real and simulated robots. The provides ROS2 services, actions, and message types for interacting with the NAMOSIM planner node. The key functionalities allow users to compute and update NAMO plans and dynamically synchronize the planner with the known environment state. The package also supports multi-robot environments and provides the ability to dynamically detect and react to conflicts via NAMOSIM's communication-free coordination strategy, as presented in our IROS 2024 publication [@renault_2024_iros]. The package integrates seamlessly with [Gazebo Sim](https://gazebosim.org/home) and any ROS2-compatible mobile robot platform such as Turtlebot. It supports holonomic and differential-drive motion models. NAMOROS is designed for research and development in multi-robot navigation, particularly in interactive environments.
+NAMOROS is a ROS 2 package addressing the problem of **N**avigation **A**mong **M**ovable **O**bstacles (NAMO). It enables mobile robots to plan and execute navigation tasks in environments where certain obstacles can be grasped and relocated. NAMOROS encapsulates our NAMOSIM [@renault_phd_thesis; @renault_2024_iros; @renault_2020_iros] motion planner within a ROS 2 framework, providing services, actions, and message types to facilite the execution of NAMO plans on real and simulated robots. The key features allow users to compute and update NAMO plans, and dynamically synchronize the planner with the changing environment state. The package also supports multi-robot environments and provides the ability to dynamically manage conflicts via NAMOSIM's communication-free coordination strategy [@renault_2024_iros]. NAMOROS integrates seamlessly with [Gazebo Sim](https://gazebosim.org/home) or any ROS 2-compatible mobile robot platform such as Turtlebot. It supports holonomic and differential-drive motion models. NAMOROS is designed for research and development in multi-robot navigation, particularly in interactive environments.
 
 # Statement of Need
 
-Robotic navigation in dynamic and cluttered environments remains a critical challenge in mobile robotics. Many interesting applications involve some kind of physical interaction with the environment and social coordination with other agents. Traditional navigation methods typically assume static obstacles in non-interactive environments, leaving high-level behaviors to other parts of the software stack which complicates their implementation. Ideally, motion planners should be able to consider physical and social interactions in the environment. NAMOROS address this gap by providing open-source ROS2 package for navigation planning in dynamic multi-agent environments with movable obstacles. Furthermore, many prior works on NAMO were conducted in simplified simulations, outside the ROS2 ecosystem and were therefore poorly compatible with physical robotic platforms. NAMOROS addresses this issue by providing a ROS2 package that supports reproducible research in and practical deployment of NAMO algorithms on real robotic systems.
+Robotic navigation in dynamic and cluttered environments remains a critical challenge in mobile robotics. Many interesting applications involve some kind of physical interaction with the environment and social coordination with other agents. Traditional navigation methods typically assume static obstacles in non-interactive environments, leaving high-level behaviors to other parts of the software stack which complicates their implementation. Ideally, motion planners should be able to consider physical and social interactions in the environment. NAMOROS address this gap by providing open-source ROS 2 package for navigation planning in dynamic multi-agent environments with movable obstacles. Furthermore, many prior works on NAMO were conducted in simplified simulations, outside the ROS 2 ecosystem and were therefore poorly compatible with physical robotic platforms. NAMOROS addresses this issue by providing a ROS 2 package that supports reproducible research in and practical deployment of NAMO algorithms on real robotic systems.
 
 In addition to single-robot navigation, NAMOROS provides important multi-robot conflict avoidance and deadlock resolution capabilities. It supports real-time synchronization of the planner state with the current state of the environment which allows for the detection of conflicts and deadlocks, and leverages the communication-free coordination strategy from NAMOSIM's `Stilman2005` agent to resolve them. This makes it particularly suitable for multi-robot settings where reactive and adaptive behavior is essential for robust operation.
 
@@ -40,7 +40,7 @@ In addition to single-robot navigation, NAMOROS provides important multi-robot c
 
 NAMOROS consists of:
 
-- ROS2 nodes for computing and executing NAMO plans
+- ROS 2 nodes for computing and executing NAMO plans
 - Integration with the NAMOSIM [@renault_phd_thesis; @renault_2020_iros; @renault_2024_iros] planner for simulation
 - Support for holonomic and differential drive robots
 - Extensible agent framework (e.g., Stilman2005 baseline agent)
@@ -51,7 +51,7 @@ NAMOROS consists of:
 
 NAMOROS provides the following key features:
 
-- **Full ROS2 Compatibility**: Includes modular ROS2 nodes for NAMO planning and execution.
+- **Full ROS 2 Compatibility**: Includes modular ROS 2 nodes for NAMO planning and execution.
 - **Multi-Robot Support**: Supports communication-free multi-robot coordination by dynamically detecting and reacting to conflicts.
 - **Movable Obstacle Interaction**: Enables grasping, relocating, and releasing of obstacles during navigation.
 - **Dynamic Replanning**: Continuously updates plans based on real-time sensor data and robot interactions.
@@ -65,18 +65,18 @@ NAMOROS provides the following key features:
 
 ## Architecture
 
-The system is organized as ROS2 packages:
+The system is organized as ROS 2 packages:
 
-- `namoros`: ROS2 nodes to control the robot and interacting with the namosim planner within a behavior tree framework
+- `namoros`: ROS 2 nodes to control the robot and interacting with the namosim planner within a behavior tree framework
 - NAMOSIM: The core planner for navigation and multi-robot coordination
-- `namoros_msgs`: Custom ROS2 message definitions
+- `namoros_msgs`: Custom ROS 2 message definitions
 - `namoros_gz`: Custom Gazebo plugin for simulating grab and release actions.
 
 Here is a block diagram showing the main components of NAMOROS:
 
 ![NAMOROS Architecture\label{fig:archi}](./static/NAMOROS_Architecture.png){style="display: block; margin: 0 auto"}
 
-The **NAMO Planner** block is a custom ROS2 node that manages the namosim planner and exposes services and actions for interacting with it.
+The **NAMO Planner** block is a custom ROS 2 node that manages the namosim planner and exposes services and actions for interacting with it.
 
 The **NAMO Behavior Tree** block is another custom node that executes the main behavior tree which controls the robot execution and interaction with the planner node.
 
@@ -86,7 +86,7 @@ If running in a Gazebo simulation, a plugin from the `namoros_gz` package is pro
 
 ### Main Behavior Tree
 
-NAMOROS provides a behavior tree to run NAMO plans on a real or simulated robot. This behavior tree controls the robot while managing sensor data and interactions with the planner node. The tree is illustrated in the following diagram and is configured to tick at a frequency of 2Hz. The robot starts by waiting to receive a start pose and a goal pose. These may come from the scenario file or be published to the corresponding ROS2 topics.
+NAMOROS provides a behavior tree to run NAMO plans on a real or simulated robot. This behavior tree controls the robot while managing sensor data and interactions with the planner node. The tree is illustrated in the following diagram and is configured to tick at a frequency of 2Hz. The robot starts by waiting to receive a start pose and a goal pose. These may come from the scenario file or be published to the corresponding ROS 2 topics.
 
 The behavior tree continuously monitors the robot's sensor data to track the positions of other robots and movable obstacles. It uses this data during specific periods to synchronize the planner node's state with the estimated state of the environment, which is necessary for conflict detection. The _New Movable_ node encapsulates a subtree that handles dynamic detection of movable obstacles but is only used when that feature is activated and is not illustrated for brevity.
 

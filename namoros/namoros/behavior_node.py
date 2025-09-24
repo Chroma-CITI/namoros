@@ -71,7 +71,6 @@ class NamoState:
         self.node = node
         self.clock = clock
         self.replan_count: int = 0
-        self.publish_init_pose_count = 0
         self.goal_pose: PoseStamped | None = None
         self.goals = copy.deepcopy(agent._navigation_goals)
         self.reset()
@@ -290,7 +289,6 @@ class NamoBehaviorNode(Node):
         self.publish_initial_pose_timer = self.create_timer(
             5.0, self.publish_initial_pose
         )
-        self.publish_init_pose_count = 0
 
         # initialize state
         self.state = NamoState(agent=self.agent, node=self, clock=self.get_clock())
@@ -329,10 +327,7 @@ class NamoBehaviorNode(Node):
                 msg.pose.pose.position.x, msg.pose.pose.position.y
             )
         )
-
-        self.publish_init_pose_count += 1
-        if self.publish_init_pose_count > 1:
-            self.publish_initial_pose_timer.cancel()
+        self.publish_initial_pose_timer.cancel()
 
     def reset(self):
         self.state.reset()

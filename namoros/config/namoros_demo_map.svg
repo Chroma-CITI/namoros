@@ -14,12 +14,12 @@
          </cc:Work>
       </rdf:RDF>
    </metadata>
-   <namo_config cell_size_cm="10.0" collision_margin_cm="15.0">
+   <namo_config cell_size_cm="10.0" collision_margin_cm="10.0">
       <agent agent_id="robot_0">
          <goal goal_id="goal_0" />
          <behavior type="stilman_2005_behavior">
             <parameters use_social_cost="true" robot_rotation_unit_angle="30.0" push_only="false"
-               drive_type="differential" />
+               drive_type="differential" manip_search_bound_percentage="0.1" />
          </behavior>
       </agent>
    </namo_config>

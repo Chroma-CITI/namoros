@@ -108,7 +108,11 @@ class ExecutePlan(py_trees.behaviour.Behaviour):
             children=[
                 PlaySound(node=self.node, sound=Sound.CLEANINGSTART),
                 Release(node=self.node),
-                BackUp(node=self.node, distance=self.node.agent.grab_start_distance),
+                BackUp(
+                    node=self.node,
+                    distance=self.node.agent.grab_start_distance
+                    - self.node.agent.grab_end_distance,
+                ),
                 ManualSyncPlanner(
                     node=self.node, path_index=path_index, action_index=0
                 ),
@@ -190,9 +194,9 @@ class ExecutePlan(py_trees.behaviour.Behaviour):
         self.tree = self.create_sub_tree()
         snapshot_visitor = py_trees.visitors.DebugVisitor()
         self.tree.visitors.append(snapshot_visitor)
-        py_trees.display.render_dot_tree(
-            self.tree.root, name="execute_plan_tree", target_directory="."
-        )
+        # py_trees.display.render_dot_tree(
+        #     self.tree.root, name="execute_plan_tree", target_directory="."
+        # )
 
     def update(self):
         if not self.tree:

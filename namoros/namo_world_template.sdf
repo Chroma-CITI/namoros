@@ -179,7 +179,7 @@
         <visual name="visual">
           <geometry>
             <mesh>
-              <uri>file://config/map_walls.stl</uri>
+              <uri>file://{{ walls_mesh }}</uri>
             </mesh>
           </geometry>
 
@@ -192,7 +192,7 @@
         <collision name='collision'>
           <geometry>
             <mesh>
-              <uri>file://config/map_walls.stl</uri>
+              <uri>file://{{ walls_mesh }}</uri>
             </mesh>
           </geometry>
         </collision>

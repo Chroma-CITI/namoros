@@ -23,7 +23,6 @@ from launch.logging import get_logger
 
 
 def spawn_robots(context: t.Any, *args, **kwargs):  # type: ignore
-    logger = get_logger()
     pkg_share = get_package_share_directory("namoros")
     urdf_path = os.path.join(
         pkg_share,
@@ -256,7 +255,7 @@ def spawn_robots(context: t.Any, *args, **kwargs):  # type: ignore
             scan_relay,
             TimerAction(period=0.0, actions=[nav2_bringup]),
             TimerAction(period=0.0, actions=[aruco_markers]),
-            TimerAction(period=5.0, actions=[namo_planner, namoros]),
+            TimerAction(period=0.0, actions=[namo_planner, namoros]),
         ]
     return robots
 
@@ -316,6 +315,7 @@ def namo_planner_bringup(context: t.Any, *args, **kwargs):  # type: ignore
         cmd=[
             "ign",
             "gazebo",
+            "-r" if LaunchConfiguration("autostart").perform(context) == "true" else "",
             "--render-engine",
             "ogre",
             "-v",
@@ -325,7 +325,6 @@ def namo_planner_bringup(context: t.Any, *args, **kwargs):  # type: ignore
         output="log",
         additional_env={
             "GZ_SIM_SYSTEM_PLUGIN_PATH": plugin_path,
-            "IGN_GAZEBO_RESOURCE_PATH": pkg_share,
         },
     )
     gz_cmds = [ros_gz_bridge, gazebo]
@@ -353,7 +352,11 @@ def generate_launch_description() -> LaunchDescription:
         default_value="false",
         choices=["true", "false"],
     )
-    namo_planner_bringup_launch = OpaqueFunction(function=namo_planner_bringup)
+    declare_autostart_arg = DeclareLaunchArgument(
+        "autostart",
+        default_value="false",
+        choices=["true", "false"],
+    )
 
     ld = LaunchDescription()
     ld.add_action(declare_sdf_arg)
@@ -361,8 +364,10 @@ def generate_launch_description() -> LaunchDescription:
     ld.add_action(declare_config_arg)
     ld.add_action(declare_map_arg)
     ld.add_action(declare_perception_arg)
-    ld.add_action(namo_planner_bringup_launch)
+    ld.add_action(declare_autostart_arg)
 
+    namo_planner_bringup_launch = OpaqueFunction(function=namo_planner_bringup)
+    ld.add_action(namo_planner_bringup_launch)
     ld.add_action(OpaqueFunction(function=spawn_robots))
     ld.add_action(OpaqueFunction(function=spawn_obstacles))
 
