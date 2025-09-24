@@ -56,7 +56,7 @@ The system is organized as ROS2 packages:
 
 Here is a block diagram showing the main components of NAMOROS:
 
-<img src="static/NAMOROS_Architecture.png" alt="NAMOROS Architecturelabel" width="1000">
+<img src="docs/source/_static/NAMOROS_Architecture.png" alt="NAMOROS Architecturelabel" width="1000">
 
 The **NAMO Planner** block is a custom ROS2 node that manages the namosim planner and exposes services and actions for interacting with it.
 
@@ -70,82 +70,48 @@ If running in a Gazebo simulation, a plugin from the `namoros_gz` package is pro
 
 The main behavior tree is illustrated in the following diagram. It ticks at a frequency of 2Hz. The robot starts by waiting to receive a start pose and goal pose. These may come from the scenario file or be published to the corresponding topics. The behavior tree continuously motors its sensor data for the positions of other robots and movable obstacles. It uses this data during specific periods to synchronize the planner node's state with the estimated state of the environment which is necessary for conflict detection. The _New Movable_ node encapsulates a subtree that handles dynamic detection of movable obstacles but is only used when that feature is activated and not shown for brevity.
 
-<img src="static/namo_main_tree.svg" alt="Main Behavior Tree" width="900">
+<img src="docs/source/_static/namo_main_tree.svg" alt="Main Behavior Tree" width="900">
 
 ### Execute Plan Subtree
 
 Because a NAMO plan consists of multiple behaviors such as path following, and grabbing and releasing obstacles, and because the plan is initially unknown and subject to change, the _Execute Plan_ bevavior dynamically creates and executes a subtree corresponding to the current plan. The following diagram shows an example subtree which consists of a _transit_ path followed by a _transfer_ path to move an obstacle, and lastly another transit path to reach the goal. Immediately before and after each _transfer_ path there are also grab and release sequences. Each of these behaviors are themselves small subtrees which are illustrated below. The _Execute Plan_ subtree always starts with a release behavior just in case the robot was already holding an obstacle at the time the plan was computed.
 
-<img src="static/execute_plan_tree.svg" alt="Execute Plan Tree" width="900">
+<img src="docs/source/_static/execute_plan_tree.svg" alt="Execute Plan Tree" width="900">
 
 ### Transit Path
 
 The transit path uses nav2 to follow the corresponding path segment within the NAMO plan.
 
-<img src="static/transit_path_tree.svg" alt="Transit Path Tree" width="600">
+<img src="docs/source/_static/transit_path_tree.svg" alt="Transit Path Tree" width="600">
 
 ### Grab Sequence
 
 The grab sequence consists of first turning towards the obstacle, approaching it within close range as determined by the lidar sensor, and finally performing the grab action. An important point is that synchronizing the planner with the observed obstacle state is disabled
 because the planner treats robot and the obstacle as a single object during transfer paths. Otherwise, the planner will detect conflicts with the obstacle the robot is already carrying.
 
-<img src="static/grab_tree.svg" alt="Grab Tree" width="700">
+<img src="docs/source/_static/grab_tree.svg" alt="Grab Tree" width="700">
 
 ### Release Sequence
 
 The release sequence first performs the release action, and the backs the robot up at a constant slow speed for a fixed time period. Then the robot re-estimates the obstacle position, synchronizes the planner, and re-computes the plan.
 
-<img src="static/release_tree.svg" alt="Release Tree" width="600">
+<img src="docs/source/_static/release_tree.svg" alt="Release Tree" width="600">
 
 ## Conflict Handling
 
 During path following, the behavior tree periodically synchronizes the planner node with the current estimated state of the environment and checks for conflicts. When a conflict is detected, the robot is interrupted, the plan is _updated_, and then plan execution is restarted.
 
-## Architecture Component Diagram
+# Demos
 
-```mermaid
----
-config:
-  theme: default
----
-C4Component
-    title Component Diagram for NAMOROS
-    Container_Boundary(namoros, "NAMOROS") {
-        Component(planner, "NAMO Planner Node", "Python", "Computes and updates NAMO plan. Tracks environment state.")
-        Component(bt, "NAMO Behavior Tree", "Python", "Executes the NAMO plans. Fuses sensor data.")
-        Container_Boundary(planner_container, "NAMO Planner Node") {
-            Component(planner, "NAMO Planner", "ROS 2 Python Node", "")
-            Component(namosim, "NAMOSIM", "Python Module", "")
-            Rel(planner, namosim, "", "")
-        }
-    }
-    Container_Boundary(gz_container, "Real or Simulated Robot") {
-        Component(gz, "Gazebo", "", "")
-        Component(namo_plugin, "NAMO GZ Plugin", "", "")
-        Component(robot, "Physical Robot", "", "")
-        Rel(gz, namo_plugin, "", "")
-        Rel(namo_plugin, gz, "", "")
-    }
-    Component(nav2, "Nav2", "", "Mobile robot navigation")
-    Component(aruco, "aruco_markers", "", "Detects aruco tags")
-    Component(bridge, "ROS GZ Bridge", "", "")
-    Component(rviz, "RViz", "", "")
-    Rel(bt, nav2, "", "")
-    Rel(bt, aruco, "", "")
-    Rel(bt, rviz, "", "")
-    Rel(bt, bridge, "", "")
-    Rel(bt, planner, "", "")
-    Rel(bt, robot, "", "")
-    Rel(planner, rviz, "", "")
-    Rel(planner, bridge, "", "")
-    Rel(bridge, gz, "", "")
-    Rel(bridge, namo_plugin, "", "")
-    Rel(nav2, bridge, "", "")
-    Rel(nav2, robot, "", "")
-    Rel(nav2, rviz, "", "")
-UpdateRelStyle(nav2, bridge, $offsetY="40")
-UpdateRelStyle(nav2, bridge, $textColor="red")
-```
+Here are a couple demo videos applying NAMOROS on real and simulated robots.
+
+#### NAMOROS on a Turtlebo
+
+[![NAMOROS on Turtlebot](docs/source/_static/namo_demo_thumbnail.png)](https://youtu.be/wFH2GOeBHEA)
+
+#### NAMOROS on Multiple Robots in Gazebo
+
+[![NAMOROS on Multiple Robots in Gazebo](docs/source/_static/multi_robot_demo_thumbnail.png)](https://youtu.be/qgPz69Dk9bc)
 
 ## Authors
 
@@ -156,12 +122,12 @@ UpdateRelStyle(nav2, bridge, $textColor="red")
 
 ## Affiliated Teams and Organisations
 
-|                                    | Org/Team                                      |
-| ---------------------------------- | --------------------------------------------- |
-| ![Inria Logo](static/inria.png)    | [Inria](https://inria.fr/fr)                  |
-| ![INSA Lyon Logo](static/insa.png) | [INSA Lyon](https://www.insa-lyon.fr/)        |
-| ![CITI Logo](static/citi.png)      | [CITI Laboratory](https://www.citi-lab.fr/)   |
-| CHROMA                             | [CHROMA Team](https://www.inria.fr/en/chroma) |
+|                                                 | Org/Team                                      |
+| ----------------------------------------------- | --------------------------------------------- |
+| ![Inria Logo](docs/source/_static/inria.png)    | [Inria](https://inria.fr/fr)                  |
+| ![INSA Lyon Logo](docs/source/_static/insa.png) | [INSA Lyon](https://www.insa-lyon.fr/)        |
+| ![CITI Logo](docs/source/_static/citi.png)      | [CITI Laboratory](https://www.citi-lab.fr/)   |
+| CHROMA                                          | [CHROMA Team](https://www.inria.fr/en/chroma) |
 
 ## Cite Us
 

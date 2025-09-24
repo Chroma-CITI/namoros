@@ -74,7 +74,7 @@ The system is organized as ROS 2 packages:
 
 Here is a block diagram showing the main components of NAMOROS:
 
-![NAMOROS Architecture\label{fig:archi}](./static/NAMOROS_Architecture.png){style="display: block; margin: 0 auto"}
+![NAMOROS Architecture\label{fig:archi}](./docs/source/_docs/source/_static/NAMOROS_Architecture.png){style="display: block; margin: 0 auto"}
 
 The **NAMO Planner** block is a custom ROS 2 node that manages the namosim planner and exposes services and actions for interacting with it.
 
@@ -90,7 +90,7 @@ NAMOROS provides a behavior tree to run NAMO plans on a real or simulated robot.
 
 The behavior tree continuously monitors the robot's sensor data to track the positions of other robots and movable obstacles. It uses this data during specific periods to synchronize the planner node's state with the estimated state of the environment, which is necessary for conflict detection. The _New Movable_ node encapsulates a subtree that handles dynamic detection of movable obstacles but is only used when that feature is activated and is not illustrated for brevity.
 
-![Main Behavior Tree\label{fig:main_tree}](./static/namo_main_tree.svg){style="display: block; margin: 0 auto"}
+![Main Behavior Tree\label{fig:main_tree}](./docs/source/_static/namo_main_tree.svg){style="display: block; margin: 0 auto"}
 
 ### Execute Plan Subtree
 

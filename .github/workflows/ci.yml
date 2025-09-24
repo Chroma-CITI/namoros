@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - humble
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    container:
+      image: osrf/ros:humble-desktop-full
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up cache for pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          apt-get update -y
+          apt-get install -y swig curl python3-pip ros-humble-grid-map-msgs
+          rosdep install --from-paths . -r -y || true
+          pip install --cache-dir ~/.cache/pip -r namosim/requirements.txt
+          pip install --cache-dir ~/.cache/pip -r namoros/requirements.txt
+
+      - name: Colcon Build and Test
+        run: |
+          source /opt/ros/humble/setup.bash
+          colcon build
+          colcon test --event-handlers console_direct+
+
+      - name: Run tests
+        run: |
+          source /opt/ros/humble/setup.bash
+          source install/setup.bash
+          ./scripts/test_all.sh
+
+      - name: Clean up
+        run: rm -rf build/ install/ log/
+        if: always()
+
+  deploy-pages:
+    runs-on: ubuntu-latest
+    container:
+      image: osrf/ros:humble-desktop-full
+    defaults:
+      run:
+        shell: bash
+    if: github.event_name == 'push' && github.ref == 'refs/heads/humble'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up cache for pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          apt-get update -y
+          apt-get install -y swig curl python3-pip
+          rosdep install --from-paths . -r -y || true
+          pip install --cache-dir ~/.cache/pip -r requirements.txt
+
+      - name: Build documentation
+        run: |
+          ./scripts/make_docs.sh
+          mv build/html ../public
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
