@@ -13,7 +13,7 @@ This repo consists of the following ROS2 packages:
 First, clone the repo and `cd` into it.
 
 ```bash
-git clone --recurse-submodules git@gitlab.inria.fr:chroma/namo/namoros.git
+git clone --recurse-submodules git@github.com:Chroma-CITI/namoros.git
 cd namoros
 ```
 
