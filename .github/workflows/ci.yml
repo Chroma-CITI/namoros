@@ -88,10 +88,9 @@ jobs:
       - name: Build documentation
         run: |
           ./scripts/make_docs.sh
-          mv build/html ../public
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
+          publish_dir: ./docs/build/html
