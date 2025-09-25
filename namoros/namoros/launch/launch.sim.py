@@ -298,7 +298,7 @@ def spawn_obstacles(context: t.Any, *args, **kwargs):  # type: ignore
     return actions
 
 
-def namo_planner_bringup(context: t.Any, *args, **kwargs):  # type: ignore
+def gz_bringup(context: t.Any, *args, **kwargs):  # type: ignore
     pkg_share = get_package_share_directory("namoros")
     plugin_prefix = get_package_prefix("namoros_gz")
     plugin_path = os.path.join(plugin_prefix, "lib")
@@ -366,8 +366,8 @@ def generate_launch_description() -> LaunchDescription:
     ld.add_action(declare_perception_arg)
     ld.add_action(declare_autostart_arg)
 
-    namo_planner_bringup_launch = OpaqueFunction(function=namo_planner_bringup)
-    ld.add_action(namo_planner_bringup_launch)
+    gz_bringup_launch = OpaqueFunction(function=gz_bringup)
+    ld.add_action(gz_bringup_launch)
     ld.add_action(OpaqueFunction(function=spawn_robots))
     ld.add_action(OpaqueFunction(function=spawn_obstacles))
 
