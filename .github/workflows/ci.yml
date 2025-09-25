@@ -83,7 +83,7 @@ jobs:
           apt-get install -y swig curl python3-pip
           rosdep update
           rosdep install --from-paths . -r -y || true
-          pip install --cache-dir ~/.cache/pip -r requirements.txt
+          pip install --cache-dir ~/.cache/pip -r namoros/requirements.txt
 
       - name: Build documentation
         run: |

@@ -7,3 +7,6 @@ black
 transforms3d
 pytest
 keyboard
+sphinx
+sphinx-copybutton
+sphinx-rtd-theme
