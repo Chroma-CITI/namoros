@@ -6,7 +6,7 @@ on:
       - humble
   pull_request:
     branches:
-      - '**'
+      - "**"
 
 jobs:
   build-and-test:
@@ -34,6 +34,7 @@ jobs:
         run: |
           apt-get update -y
           apt-get install -y swig curl python3-pip ros-humble-grid-map-msgs
+          rosdep update
           rosdep install --from-paths . -r -y || true
           pip install --cache-dir ~/.cache/pip -r namosim/requirements.txt
           pip install --cache-dir ~/.cache/pip -r namoros/requirements.txt
@@ -80,6 +81,7 @@ jobs:
         run: |
           apt-get update -y
           apt-get install -y swig curl python3-pip
+          rosdep update
           rosdep install --from-paths . -r -y || true
           pip install --cache-dir ~/.cache/pip -r requirements.txt
 
