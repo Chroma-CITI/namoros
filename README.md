@@ -1,7 +1,6 @@
 # NAMOROS
 
-A set of ROS2 nodes which expose services and topics for computing NAMO plans and interacting with the **namosim** planner
-This repo consists of the following ROS2 packages:
+NAMOROS is a ROS 2 package addressing the problem of **N**avigation **A**mong **M**ovable **O**bstacles (NAMO). It enables mobile robots to plan and execute navigation tasks in environments where certain obstacles can be grasped and relocated. NAMOROS encapsulates the [NAMOSIM](https://github.com/Chroma-CITI/namosim) motion planner within a ROS 2 framework, providing services, actions, and message types to facilite the execution of NAMO plans on real and simulated robots. The package allow users to compute and update NAMO plans, and dynamically synchronize the planner with the changing environment state. It also supports multi-robot environments and provides the ability to dynamically manage conflicts via NAMOSIM's communication-free coordination strategy. NAMOROS integrates seamlessly with [Gazebo Sim](https://gazebosim.org/home) or any ROS 2-compatible mobile robot platform. It supports holonomic and differential-drive motion models. NAMOROS is designed for R&D in multi-robot navigation, particularly in interactive environments.
 
 ## System Requirements
 
