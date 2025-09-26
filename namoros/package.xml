@@ -25,7 +25,6 @@
   <depend>python3-numpy</depend>
   <depend>python3-pyright-pip</depend>
   <depend>python3-pytest</depend>
-  <depend>python3-pytransform3d-pip</depend>
   <depend>python3-transforms3d</depend>
   <depend>python3-typer</depend>
   <depend>rclpy</depend>

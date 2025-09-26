@@ -12,7 +12,7 @@ NAMOROS is a ROS 2 package addressing the problem of **N**avigation **A**mong **
 First, clone the repo and `cd` into it.
 
 ```bash
-git clone --recurse-submodules git@github.com:Chroma-CITI/namoros.git
+git clone git@github.com:Chroma-CITI/namoros.git
 cd namoros
 ```
 
@@ -22,10 +22,9 @@ Next, use `rosdep` to install the dependencies listed in the `package.xml` files
 rosdep install --from-paths . -r -y
 ```
 
-If any of the python dependencies fail to install with `rosdep` you can try to install them with `pip` instead:
+Some python dependencies must be installed with `pip`:
 
 ```bash
-pip install -r namosim/requirements.txt
 pip install -r namoros/requirements.txt
 ```
 
@@ -49,7 +48,6 @@ In order to launch a simulation demonstration a robot that makes use of namoros 
 The system is organized as ROS2 packages:
 
 - `namoros`: ROS2 nodes to control the robot and interacting with the namosim planner within a behavior tree framework
-- `namosim`: The core planner for navigation and multi-robot coordination
 - `namoros_msgs`: Custom ROS2 message definitions
 - `namoros_gz`: Custom Gazebo plugin for simulating grab and release actions.
 

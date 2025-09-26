@@ -1,4 +1,0 @@
-[submodule "namosim"]
-	path = namosim
-	url = git@github.com:Chroma-CITI/namosim.git
-	branch = humble
