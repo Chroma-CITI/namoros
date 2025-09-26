@@ -202,6 +202,7 @@ def spawn_robots(context: t.Any, *args, **kwargs):  # type: ignore
                 "use_namespace": "True",
                 "params_file": os.path.join(pkg_share, "config/nav2_params.yaml"),
                 "map": LaunchConfiguration("map_yaml"),
+                "autostart": "True",
                 "use_sim_time": "True",
                 "log_level": "error",
             }.items(),
@@ -315,7 +316,7 @@ def gz_bringup(context: t.Any, *args, **kwargs):  # type: ignore
         cmd=[
             "ign",
             "gazebo",
-            "-r" if LaunchConfiguration("autostart").perform(context) == "true" else "",
+            # "-r" if LaunchConfiguration("autostart").perform(context) == "true" else "",
             "--render-engine",
             "ogre",
             "-v",

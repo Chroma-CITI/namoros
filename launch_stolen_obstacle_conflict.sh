@@ -17,4 +17,4 @@ ros2 launch namoros launch.sim.py \
     sdf_file:=${DIR}/namoros/config/stolen_obstacle_conflict.sdf \
     map_yaml:=${DIR}/namoros/config/stolen_obstacle_conflict.yaml \
     omniscient_obstacle_perception:="true" \
-    autostart:="true"
+    autostart:="false"
