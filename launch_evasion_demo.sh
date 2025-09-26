@@ -8,11 +8,11 @@ source ./install/setup.bash
 
 export IGN_GAZEBO_RESOURCE_PATH=$IGN_GAZEBO_RESOURCE_PATH:${DIR}/namoros/config
 
-ros2 run namoros scenario2sdf --svg-file=${DIR}/namoros/config/namoros_multi_map.svg --out-dir=${DIR}/namoros/config
+ros2 run namoros scenario2sdf --svg-file=${DIR}/namoros/config/evasion_demo.svg --out-dir=${DIR}/namoros/config
 
 ros2 launch namoros launch.sim.py \
-    scenario_file:=${DIR}/namoros/config/namoros_multi_map.svg \
+    scenario_file:=${DIR}/namoros/config/evasion_demo.svg \
     config_file:=${DIR}/namoros/config/namoros_config.yaml \
-    sdf_file:=${DIR}/namoros/config/namoros_multi_map.sdf \
-    map_yaml:=${DIR}/namoros/config/namoros_multi_map.yaml \
+    sdf_file:=${DIR}/namoros/config/evasion_demo.sdf \
+    map_yaml:=${DIR}/namoros/config/evasion_demo.yaml \
     autostart:="true"
