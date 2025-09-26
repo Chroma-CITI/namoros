@@ -2,8 +2,8 @@
 Changelog for package namoros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.1 (2025-09-26)
+------------------
 * update requirements
 * docs
 * clean up

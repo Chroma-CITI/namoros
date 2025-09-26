@@ -2,8 +2,8 @@
 Changelog for package namoros_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.1 (2025-09-26)
+------------------
 * update requirements
 * make sure planner release obstacle when robot does
 * manually sync state before grab
