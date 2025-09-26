@@ -36,7 +36,6 @@ jobs:
           apt-get install -y swig curl python3-pip ros-humble-grid-map-msgs
           rosdep update
           rosdep install --from-paths . -r -y || true
-          pip install --cache-dir ~/.cache/pip -r namosim/requirements.txt
           pip install --cache-dir ~/.cache/pip -r namoros/requirements.txt
 
       - name: Colcon Build and Test

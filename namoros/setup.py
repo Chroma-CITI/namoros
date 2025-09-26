@@ -63,7 +63,7 @@ setup(
     install_requires=requirements,
     zip_safe=True,
     maintainer="chroma",
-    maintainer_email="david.brown@inria.fr",
+    maintainer_email="davewbrwn@gmail.com",
     description="A ROS package for Navigation Among Movable Obstacles (NAMO)",
     license="AGPLv3",
     entry_points={
