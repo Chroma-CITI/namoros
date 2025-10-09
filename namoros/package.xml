@@ -23,7 +23,6 @@
   <depend>py_trees</depend>
   <depend>python3-jinja2</depend>
   <depend>python3-numpy</depend>
-  <depend>python3-pyright-pip</depend>
   <depend>python3-pytest</depend>
   <depend>python3-transforms3d</depend>
   <depend>python3-typer</depend>
